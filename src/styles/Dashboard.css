@@ -1,0 +1,125 @@
+.dashboard-grid {
+    position: relative;
+    width: 100%;
+    max-width: 1400px;
+    height: 85vh;        
+    margin: 40px auto 0 auto;
+    padding: 40px 60px 120px 60px;
+    
+}
+
+
+
+.gauge-card {
+    width: 320px;
+    text-align: center;
+}
+
+.gauge-svg {
+    width: 320px;
+    height: 200px;
+}
+
+.gauge-value {
+    position: absolute;
+    top: 95px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 28px;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.gauge-label {
+    margin-top: 12px;
+    font-size: 22px;        
+    font-weight: 700;       
+    letter-spacing: 0.5px;  
+    color: #facc15;        
+    text-transform: uppercase;
+}
+
+
+.top-left,
+.top-right,
+.bottom-left,
+.bottom-right {
+    position: absolute;
+}
+
+.top-left { top: 0; left: 0; }
+.top-right { top: 0; right: 0; }
+.bottom-left { bottom: 0; left: 0; }
+.bottom-right { bottom: 0; right: 0; }
+
+
+.center-premium {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.premium-value {
+    font-size: 72px;
+    font-weight: 900;
+    color: #facc15;
+    margin-bottom: 25px;
+}
+
+.premium-bar-container {
+    width: 420px;
+    height: 16px;
+    background: #1e1e1e;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #2e2e2e;
+    margin: 0 auto;
+}
+
+.premium-bar-fill {
+    height: 100%;
+    background: linear-gradient(to right, #22c55e, #facc15, #ef4444);
+    transition: width 0.6s ease;
+}
+
+.premium-label {
+    margin-top: 12px;
+    font-size: 16px;
+    color: #9ca3af;
+}
+
+.timestamp {
+    margin-top: 40px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #facc15;
+    letter-spacing: 1px;
+}
+.bottom-action {
+    margin-top: 40px;
+    margin-bottom: 60px;   
+    display: flex;
+    justify-content: center;
+}
+
+
+.predict-btn {
+    padding: 16px 36px;
+    background-color: #facc15;
+    color: #000;
+    font-size: 18px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.predict-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(250, 204, 21, 0.4);
+}
+
+

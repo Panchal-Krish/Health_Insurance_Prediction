@@ -1,0 +1,86 @@
+.predict-page {
+    min-height: calc(100vh - 120px);
+    padding: 80px 24px;
+    background-color: #121212;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.predict-form {
+    width: 100%;
+    max-width: 520px;
+    background-color: #1e1e1e;
+    padding: 32px;
+    border-radius: 16px;
+    border: 1px solid #2e2e2e;
+}
+
+.predict-form h2 {
+    text-align: center;
+    color: #facc15;
+    margin-bottom: 24px;
+}
+
+.predict-form input,
+.predict-form select {
+    width: 100%;
+    height: 46px;
+    margin-bottom: 16px;
+    padding: 0 14px;
+
+    background-color: #121212;
+    color: #e5e7eb;
+
+    border: 1px solid #2e2e2e;
+    border-radius: 8px;
+}
+
+.predict-form input::placeholder {
+    color: #9ca3af;
+}
+
+.predict-form label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #e5e7eb;
+    margin-bottom: 16px;
+}
+
+.predict-form button {
+    width: 100%;
+    margin-top: 8px;
+    padding: 14px;
+
+    background-color: #facc15;
+    color: #000;
+    font-size: 16px;
+    font-weight: 700;
+
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.predict-form button:hover {
+    opacity: 0.9;
+}
+/* ✅ FIX CHECKBOX STYLING */
+.predict-form label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #e5e7eb;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+/* Normalize checkbox size */
+.predict-form input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #facc15; /* yellow */
+    cursor: pointer;
+}

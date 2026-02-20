@@ -1,0 +1,98 @@
+/* =======================
+   DARK HEADER
+======================= */
+
+.header {
+    height: 80px;
+    padding: 0 32px;
+    background: #121212; /* dark background */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #2e2e2e;
+}
+
+/* Logo section */
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-image {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+    background: transparent;
+}
+
+.logo-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #facc15; /* yellow */
+}
+
+.tagline {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+/* Navigation */
+.nav {
+    display: flex;
+    gap: 32px;
+    font-size: 16px;
+}
+
+.nav a {
+    text-decoration: none;
+    color: #e5e7eb;
+    font-weight: 500;
+    position: relative;
+    transition: color 0.2s ease;
+}
+
+.nav a:hover {
+    color: #facc15;
+}
+
+.nav a.active {
+    color: #facc15;
+    font-weight: 600;
+}
+
+/* Actions */
+.actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Dashboard / Logout buttons */
+.signin-btn {
+    background: #facc15;
+    color: #000;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    transition: opacity 0.2s ease;
+}
+
+.signin-btn:hover {
+    opacity: 0.9;
+}
+
+/* Remove any forced logo background */
+.nav-logo img {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}

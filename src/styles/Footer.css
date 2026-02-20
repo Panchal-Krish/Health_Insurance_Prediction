@@ -1,0 +1,178 @@
+.footer {
+    background-color: #121212;
+    border-top: 1px solid #1f1f1f;
+    padding: 60px 0 24px;
+    margin-top: auto;
+}
+
+/* Container */
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+}
+
+/* Grid */
+.footer-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    gap: 48px;
+    margin-bottom: 48px;
+}
+
+/* Brand Section */
+.footer-brand {
+    max-width: 380px;
+}
+
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.footer-logo-img {
+    height: 60px;
+    width: auto;
+}
+
+.footer-logo-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #facc15; /* Yellow accent */
+}
+
+.footer-logo-tagline {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.footer-description {
+    font-size: 14px;
+    color: #e5e7eb;
+    font-weight: 500;
+    margin: 16px 0 12px;
+}
+
+.footer-mission {
+    font-size: 14px;
+    color: #9ca3af;
+    line-height: 1.6;
+}
+
+/* Headings */
+.footer-heading {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 16px;
+}
+
+/* Links */
+.footer-links a {
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: #facc15;
+}
+
+/* Contact */
+.footer-contact span,
+.footer-contact a {
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+.footer-contact a:hover {
+    color: #facc15;
+}
+
+.contact-icon {
+    color: #9ca3af;
+}
+
+/* Social */
+.footer-social-text {
+    font-size: 14px;
+    color: #9ca3af;
+    margin-bottom: 16px;
+}
+
+.footer-social {
+    display: flex;
+    gap: 12px;
+}
+
+.social-icon {
+    width: 42px;
+    height: 42px;
+    background: #111111;
+    border: 1px solid #1f1f1f;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.social-icon .icon {
+    color: #9ca3af;
+}
+
+.social-icon:hover {
+    background: #facc15;
+    transform: translateY(-2px);
+}
+
+.social-icon:hover .icon {
+    color: #000;
+}
+
+/* Bottom */
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 24px;
+    border-top: 1px solid #1f1f1f;
+}
+
+.footer-copyright {
+    font-size: 14px;
+    color: #9ca3af;
+}
+
+.footer-legal a {
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.footer-legal a:hover {
+    color: #facc15;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .footer-content {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+    }
+}
+
+@media (max-width: 768px) {
+    .footer-content {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+}
