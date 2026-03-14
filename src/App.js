@@ -22,6 +22,10 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Contact from './pages/Contact';
 import Predict from './pages/Predict';
+import HelpDesk from "./pages/HelpDesk";
+import AdminTickets from "./pages/AdminTickets";
+import AdminPanel from "./pages/AdminPanel";
+import ManagerDashboard from "./pages/ManagerDashboard";
 
 
 import './styles/App.css';
@@ -45,7 +49,10 @@ function App() {
             <Route path="/privacy-policy" element={<div className="page-placeholder">Privacy Policy</div>} />
             <Route path="/terms-of-service" element={<div className="page-placeholder">Terms of Service</div>} />
             <Route path="/predict" element={<Predict />} />
-            
+            <Route path="/helpdesk" element={<HelpDesk />} />
+            <Route path="/admin-tickets" element={<AdminTickets />} />
+            <Route path="/admin" element={<AdminPanel />} />          
+            <Route path="/manager" element={<ManagerDashboard />} />
           </Routes>
         </main>
         <Footer />

@@ -19,7 +19,7 @@ function Dashboard() {
             .catch(() => setHistory(null));
     }, [email, navigate]);
 
-    // ---------- NORMALIZE SAFELY ----------
+    // ---------------- NORMALIZE ----------------
     const normalize = (type, value) => {
         if (type === "smoker") {
             return value ? 100 : 10;
@@ -46,11 +46,12 @@ function Dashboard() {
         return "#ef4444";
     };
 
-    // ---------- GAUGE COMPONENT ----------
+    // ---------------- GAUGE COMPONENT ----------------
     const HalfGauge = ({ label, value, type }) => {
         const percent = normalize(type, value);
         const circumference = 440;
-        const dashOffset = circumference - (percent / 100) * circumference;
+        const dashOffset =
+            circumference - (percent / 100) * circumference;
 
         return (
             <div className="gauge-card">
@@ -94,76 +95,97 @@ function Dashboard() {
         return { label: "High", percent: 95 };
     };
 
-    if (!history) {
-        return (
-            <section className="dashboard">
-                <p style={{ color: "#9ca3af" }}>
+    const premiumRisk =
+        history && getPremiumRisk(history.predicted_premium);
+
+    return (
+        <section className="dashboard">
+
+            {/* -------- EMPTY STATE -------- */}
+            {!history && (
+                <p style={{ color: "#9ca3af", marginTop: "40px" }}>
                     No premium predictions yet.
                 </p>
-            </section>
-        );
-    }
+            )}
 
-    const premiumRisk = getPremiumRisk(history.predicted_premium);
+            {/* -------- DASHBOARD CONTENT -------- */}
+            {history && (
+                <>
+                    <div className="dashboard-grid">
 
-return (
-    <section className="dashboard">
+                        <div className="top-left">
+                            <HalfGauge
+                                label="Age"
+                                value={history.age}
+                                type="age"
+                            />
+                        </div>
 
-        <div className="dashboard-grid">
+                        <div className="top-right">
+                            <HalfGauge
+                                label="BMI"
+                                value={history.bmi}
+                                type="bmi"
+                            />
+                        </div>
 
-            <div className="top-left">
-                <HalfGauge label="Age" value={history.age} type="age" />
+                        <div className="bottom-left">
+                            <HalfGauge
+                                label="Smoker"
+                                value={history.smoker}
+                                type="smoker"
+                            />
+                        </div>
+
+                        <div className="bottom-right">
+                            <HalfGauge
+                                label="Income"
+                                value={history.annual_income}
+                                type="income"
+                            />
+                        </div>
+
+                        <div className="center-premium">
+                            <div className="premium-value">
+                                ₹{history.predicted_premium}
+                            </div>
+
+                            <div className="premium-bar-container">
+                                <div
+                                    className="premium-bar-fill"
+                                    style={{
+                                        width: `${premiumRisk.percent}%`
+                                    }}
+                                />
+                            </div>
+
+                            <div className="premium-label">
+                                Premium: {premiumRisk.label}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="timestamp">
+                        Last Checked:{" "}
+                        {new Date(
+                            history.last_checked_at
+                        ).toLocaleString()}
+                    </div>
+                </>
+            )}
+
+            {/* -------- BUTTON ALWAYS VISIBLE -------- */}
+            <div className="bottom-action">
+                <button
+                    className="predict-btn"
+                    onClick={() => navigate("/predict")}
+                >
+                    Predict New Premium
+                </button>
             </div>
 
-            <div className="top-right">
-                <HalfGauge label="BMI" value={history.bmi} type="bmi" />
-            </div>
-
-            <div className="bottom-left">
-                <HalfGauge label="Smoker" value={history.smoker} type="smoker" />
-            </div>
-
-            <div className="bottom-right">
-                <HalfGauge label="Income" value={history.annual_income} type="income" />
-            </div>
-
-            <div className="center-premium">
-                <div className="premium-value">
-                    ₹{history.predicted_premium}
-                </div>
-
-                <div className="premium-bar-container">
-                    <div
-                        className="premium-bar-fill"
-                        style={{ width: `${premiumRisk.percent}%` }}
-                    />
-                </div>
-
-                <div className="premium-label">
-                    Premium: {premiumRisk.label}
-                </div>
-            </div>
-
-        </div>
-
-        <div className="timestamp">
-            Last Checked: {new Date(history.last_checked_at).toLocaleString()}
-        </div>
-
-        {/* 👇 Button Now At Bottom */}
-        <div className="bottom-action">
-            <button
-                className="predict-btn"
-                onClick={() => navigate("/predict")}
-            >
-                Predict New Premium
-            </button>
-        </div>
-
-    </section>
-);
-
-
+        </section>
+    );
 }
 
 export default Dashboard;

@@ -1,0 +1,55 @@
+.admin-container {
+  padding: 40px 60px;
+  color: white;
+}
+
+.manager-form {
+  margin-bottom: 40px;
+}
+
+.manager-form form {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.manager-form input {
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+}
+
+.manager-form button {
+  background: #facc15;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+.ticket-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.ticket-table th,
+.ticket-table td {
+  padding: 12px;
+  border-bottom: 1px solid #333;
+}
+
+.ticket-table th {
+  color: #facc15;
+}
+
+.ticket-table select {
+  padding: 6px;
+}
+
+.ticket-table button {
+  background: #facc15;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
