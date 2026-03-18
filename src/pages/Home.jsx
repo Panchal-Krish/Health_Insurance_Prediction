@@ -1,119 +1,136 @@
-// import "./../styles/Home.css";
-
-// function Home() {
-//     return (
-//         <section className="hero">
-//             <span className="badge">AI-Powered Health Analysis</span>
-
-//             <h1>
-//                 Unlock Your Health's <br />
-//                 <span>Future, Today</span>
-//             </h1>
-
-//             <p>
-//                 Our AI-powered platform transforms your routine blood test data into clear, personalized risk predictions for chronic diseases, guiding you towards proactive wellness.
-//             </p>
-
-//             <div className="buttons">
-//                 <button className="primary">
-//                     Get Your Free Health Prediction →
-//                 </button>
-//                 <button className="secondary">
-//                     Learn How It Works →
-//                 </button>
-//             </div>
-//         </section>
-//     );
-// }
-
-// export default Home;
-
 import React from 'react';
-import { Sparkles, ArrowRight, Award, Users, Lock } from 'lucide-react';
+import { Sparkles, ArrowRight, Award, Shield, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { isAuthenticated } from '../utils/auth';
 import "./../styles/Home.css";
 
 function Home() {
     const navigate = useNavigate();
 
     const handleGetPrediction = () => {
-        navigate('/dashboard');
+        // If already logged in, go to predict page
+        // If not logged in, go to signup
+        if (isAuthenticated()) {
+            navigate('/predict');
+        } else {
+            navigate('/signup');
+        }
     };
 
-    const handleLearnMore = () => {
-        navigate('/how-it-works');
+    const handleContactUs = () => {
+        navigate('/contact');
     };
 
     return (
         <>
             {/* Hero Section */}
             <section className="hero">
-
-
                 <h1>
                     Predict Your <br />
-                    <span>Health Insurance, Today</span>
+                    <span>Health Insurance Premium</span>
                 </h1>
 
                 <p>
-                    Our AI-powered platform analyzes your health data to predict insurance charges early, so you can prepare your wallet before visiting the hospital.
+                    Get instant insurance premium estimates based on your health profile. 
+                    Make informed decisions about your healthcare coverage.
                 </p>
 
                 <div className="buttons">
                     <button className="primary" onClick={handleGetPrediction}>
                         <Sparkles className="btn-icon" />
-                        Get Your Free Health Prediction
+                        {isAuthenticated() ? "Calculate Premium" : "Get Started Free"}
                         <ArrowRight className="btn-icon" />
                     </button>
-                    <button className="secondary" onClick={handleLearnMore}>
-                        Learn How It Works
+                    <button className="secondary" onClick={handleContactUs}>
+                        Contact Us
                         <ArrowRight className="btn-icon" />
                     </button>
                 </div>
             </section>
 
-            {/* Why Trust PrognosAI Section */}
+            {/* Features Section */}
             <section className="trust-section">
                 <div className="trust-container">
-                    <h2 className="trust-title">Why Trust Yam Hai Hum?</h2>
+                    <h2 className="trust-title">Why Use Our Premium Calculator?</h2>
                     <p className="trust-subtitle">
-                        Discover the key factors that make Yam your trusted partner in Insurance.
+                        Fast, accurate insurance premium estimates tailored to your profile
                     </p>
 
                     <div className="trust-cards">
                         <div className="trust-card">
                             <div className="trust-icon">
+                                <TrendingUp className="icon" />
+                            </div>
+                            <h3 className="trust-card-title">Data-Driven Estimates</h3>
+                            <p className="trust-card-description">
+                                Premium calculations based on comprehensive insurance industry data 
+                                including age, BMI, lifestyle factors, and regional variations.
+                            </p>
+                        </div>
+
+                        <div className="trust-card">
+                            <div className="trust-icon">
                                 <Award className="icon" />
                             </div>
-                            <h3 className="trust-card-title">Science-Backed</h3>
+                            <h3 className="trust-card-title">Instant Results</h3>
                             <p className="trust-card-description">
-                                Our AI models are trained on extensive medical datasets and validated
-                                through rigorous scientific research.
+                                Get your premium estimate in seconds. No waiting, no complicated forms. 
+                                Simple, fast, and accurate predictions.
                             </p>
                         </div>
 
                         <div className="trust-card">
                             <div className="trust-icon">
-                                <Users className="icon" />
+                                <Shield className="icon" />
                             </div>
-                            <h3 className="trust-card-title">Human-Validated</h3>
+                            <h3 className="trust-card-title">Secure & Private</h3>
                             <p className="trust-card-description">
-                                Every prediction is reviewed and validated by certified Insurance
-                                professionals for accuracy and safety.
-                            </p>
-                        </div>
-
-                        <div className="trust-card">
-                            <div className="trust-icon">
-                                <Lock className="icon" />
-                            </div>
-                            <h3 className="trust-card-title">Completely Private</h3>
-                            <p className="trust-card-description">
-                                Your health data is encrypted, secure, and never shared with third
-                                parties.
+                                Your personal information is protected with industry-standard security. 
+                                We never share your data with third parties.
                             </p>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            {/* How It Works Section */}
+            <section className="how-it-works">
+                <div className="trust-container">
+                    <h2 className="trust-title">How It Works</h2>
+                    <div className="steps-grid">
+                        <div className="step-card">
+                            <div className="step-number">1</div>
+                            <h3>Create Account</h3>
+                            <p>Sign up with your email in just a few seconds</p>
+                        </div>
+                        <div className="step-card">
+                            <div className="step-number">2</div>
+                            <h3>Enter Health Data</h3>
+                            <p>Provide basic information: age, BMI, lifestyle habits</p>
+                        </div>
+                        <div className="step-card">
+                            <div className="step-number">3</div>
+                            <h3>Get Estimate</h3>
+                            <p>Receive your personalized premium estimate instantly</p>
+                        </div>
+                        <div className="step-card">
+                            <div className="step-number">4</div>
+                            <h3>Track & Compare</h3>
+                            <p>View your history and make informed insurance decisions</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* CTA Section */}
+            <section className="cta-section">
+                <div className="cta-container">
+                    <h2>Ready to Get Started?</h2>
+                    <p>Join thousands of users making smarter insurance decisions</p>
+                    <button className="cta-button" onClick={handleGetPrediction}>
+                        {isAuthenticated() ? "Calculate Your Premium" : "Sign Up Now"}
+                        <ArrowRight className="btn-icon" />
+                    </button>
                 </div>
             </section>
         </>
