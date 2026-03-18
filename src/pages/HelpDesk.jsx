@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { Loader, AlertCircle, CheckCircle, Ticket as TicketIcon, User, Clock } from "lucide-react";
+import { getToken, fetchWithAuth } from "../utils/auth";
 import "./../styles/HelpDesk.css";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 function HelpDesk() {
-  const email = localStorage.getItem("userEmail");
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
     subject: "",
@@ -14,29 +18,72 @@ function HelpDesk() {
 
   const [tickets, setTickets] = useState([]);
   const [expandedTicket, setExpandedTicket] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
-    if (email) {
-      fetchTickets();
+    // Check authentication
+    const token = getToken();
+    if (!token) {
+      navigate("/signin");
+      return;
     }
-  }, [email]);
+
+    // Fetch tickets
+    fetchTickets();
+  }, [navigate]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    // Clear error when user types
+    if (error) setError(null);
   };
 
   const submitTicket = async (e) => {
     e.preventDefault();
 
+    // Validation
+    if (form.subject.trim().length < 5) {
+      setError("Subject must be at least 5 characters long");
+      return;
+    }
+
+    if (form.description.trim().length < 10) {
+      setError("Description must be at least 10 characters long");
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+    setSuccessMessage("");
+
     try {
-      await axios.post("http://127.0.0.1:5000/create-ticket", {
-        ...form,
-        email: email
-      });
+      const response = await fetchWithAuth(
+        `${API_URL}/create-ticket`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            subject: form.subject.trim(),
+            description: form.description.trim(),
+            category: form.category,
+            priority: form.priority
+          })
+        }
+      );
 
-      alert("Ticket Submitted Successfully!");
-      fetchTickets();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to submit ticket");
+      }
 
+      const data = await response.json();
+
+      // Show success message
+      setSuccessMessage(`Ticket ${data.ticket_id} created successfully!`);
+
+      // Reset form
       setForm({
         subject: "",
         description: "",
@@ -44,20 +91,48 @@ function HelpDesk() {
         priority: "Medium"
       });
 
-    } catch (error) {
-      console.error(error);
-      alert("Error submitting ticket");
+      // Refresh tickets
+      await fetchTickets();
+
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccessMessage(""), 5000);
+
+    } catch (err) {
+      console.error("Error submitting ticket:", err);
+      setError(err.message || "Unable to submit ticket. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const fetchTickets = async () => {
+    setLoading(true);
+    setError(null);
+
     try {
-      const res = await axios.get(
-        `http://127.0.0.1:5000/my-tickets/${email}`
+      const storage = localStorage.getItem('token') ? localStorage : sessionStorage;
+      const email = storage.getItem('userEmail');
+
+      if (!email) {
+        throw new Error("User email not found");
+      }
+
+      const response = await fetchWithAuth(
+        `${API_URL}/my-tickets/${email}`
       );
-      setTickets(res.data);
-    } catch (error) {
-      console.error(error);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch tickets");
+      }
+
+      const data = await response.json();
+      setTickets(data);
+
+    } catch (err) {
+      console.error("Error fetching tickets:", err);
+      setError("Unable to load your tickets. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -65,9 +140,58 @@ function HelpDesk() {
     setExpandedTicket(expandedTicket === id ? null : id);
   };
 
+  const getStatusColor = (status) => {
+    const statusLower = status.toLowerCase();
+    if (statusLower.includes("open")) return "#3b82f6";
+    if (statusLower.includes("progress")) return "#f59e0b";
+    if (statusLower.includes("resolved") || statusLower.includes("closed")) return "#10b981";
+    if (statusLower.includes("waiting")) return "#8b5cf6";
+    return "#6b7280";
+  };
+
+  const getPriorityColor = (priority) => {
+    if (priority === "High") return "#ef4444";
+    if (priority === "Medium") return "#f59e0b";
+    return "#22c55e";
+  };
+
+  // Loading state
+  if (loading && tickets.length === 0) {
+    return (
+      <div className="helpdesk-container">
+        <div className="loading-state">
+          <Loader className="spinner-large" />
+          <p>Loading your tickets...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="helpdesk-container">
-      <h1 className="page-title">Help Desk</h1>
+      <div className="helpdesk-header">
+        <TicketIcon className="header-icon" />
+        <div>
+          <h1 className="page-title">Help Desk</h1>
+          <p className="page-subtitle">Submit and track your support tickets</p>
+        </div>
+      </div>
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="success-message">
+          <CheckCircle className="success-icon" />
+          <span>{successMessage}</span>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {error && (
+        <div className="error-message">
+          <AlertCircle className="error-icon" />
+          <span>{error}</span>
+        </div>
+      )}
 
       {/* Ticket Form */}
       <div className="ticket-form-card">
@@ -75,110 +199,197 @@ function HelpDesk() {
 
         <form onSubmit={submitTicket}>
           <div className="form-row">
-            <input
-              name="subject"
-              placeholder="Subject"
-              value={form.subject}
-              onChange={handleChange}
-              required
-            />
+            <div className="form-group">
+              <label>Subject *</label>
+              <input
+                name="subject"
+                placeholder="Brief summary of your issue"
+                value={form.subject}
+                onChange={handleChange}
+                disabled={submitting}
+                required
+                maxLength={100}
+              />
+            </div>
 
-            <select
-              name="priority"
-              value={form.priority}
-              onChange={handleChange}
-            >
-              <option>Low</option>
-              <option>Medium</option>
-              <option>High</option>
-            </select>
+            <div className="form-group">
+              <label>Priority *</label>
+              <select
+                name="priority"
+                value={form.priority}
+                onChange={handleChange}
+                disabled={submitting}
+              >
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
           </div>
 
-          <textarea
-            name="description"
-            placeholder="Describe your issue..."
-            value={form.description}
-            onChange={handleChange}
-            required
-          />
+          <div className="form-group">
+            <label>Description *</label>
+            <textarea
+              name="description"
+              placeholder="Describe your issue in detail..."
+              value={form.description}
+              onChange={handleChange}
+              disabled={submitting}
+              required
+              rows={5}
+              maxLength={1000}
+            />
+            <small className="char-count">
+              {form.description.length}/1000 characters
+            </small>
+          </div>
 
           <div className="form-row">
-            <select
-              name="category"
-              value={form.category}
-              onChange={handleChange}
-            >
-              <option>Model Issue</option>
-              <option>Prediction Error</option>
-              <option>Technical Problem</option>
-              <option>Account Problem</option>
-            </select>
+            <div className="form-group">
+              <label>Category *</label>
+              <select
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+                disabled={submitting}
+              >
+                <option value="Model Issue">Model Issue</option>
+                <option value="Prediction Error">Prediction Error</option>
+                <option value="Technical Problem">Technical Problem</option>
+                <option value="Account Problem">Account Problem</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
 
-            <button type="submit" className="primary-btn">
-              Submit Ticket
+            <button 
+              type="submit" 
+              className="submit-btn"
+              disabled={submitting}
+            >
+              {submitting ? (
+                <>
+                  <Loader className="spinner" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit Ticket"
+              )}
             </button>
           </div>
         </form>
       </div>
 
       {/* Tickets Section */}
-      <h2 className="section-title">My Tickets</h2>
+      <div className="tickets-section">
+        <h2 className="section-title">My Tickets ({tickets.length})</h2>
 
-      <div className="tickets-grid">
-        {tickets.length === 0 ? (
-          <p className="no-ticket">No tickets submitted yet.</p>
-        ) : (
-          tickets.map((ticket) => (
-            <div
-              key={ticket.ticket_id}
-              className="ticket-card"
-              onClick={() => toggleTicket(ticket.ticket_id)}
-            >
-              <div className="ticket-header">
-                <div>
-                  <div className="ticket-id">{ticket.ticket_id}</div>
-                  <div className="ticket-subject">{ticket.subject}</div>
-                </div>
-
-                <span
-                  className={`status-badge ${ticket.status.toLowerCase()}`}
-                >
-                  {ticket.status}
-                </span>
-              </div>
-
-              <p className="priority">
-                Priority: <span>{ticket.priority}</span>
-              </p>
-
-              {/* Expandable Section */}
-              {expandedTicket === ticket.ticket_id && (
-                <div className="ticket-details">
-                  <div>
-                    <strong>Category:</strong> {ticket.category}
-                  </div>
-
-                  <div>
-                    <strong>Created:</strong>{" "}
-                    {new Date(ticket.created_at).toLocaleString()}
-                  </div>
-
-                  <div className="ticket-description">
-                    <strong>Description:</strong>
-                    <p>{ticket.description}</p>
-                  </div>
-
-                  <div className="admin-response">
-                    <strong>Admin Response:</strong>
-                    <p>
-                      {ticket.admin_response || "Waiting for response..."}
-                    </p>
-                  </div>
-                </div>
-              )}
+        <div className="tickets-grid">
+          {tickets.length === 0 ? (
+            <div className="empty-state">
+              <TicketIcon className="empty-icon" />
+              <p>No tickets submitted yet</p>
+              <small>Create a ticket above if you need help</small>
             </div>
-          ))
-        )}
+          ) : (
+            tickets.map((ticket) => (
+              <div
+                key={ticket.ticket_id}
+                className="ticket-card"
+                onClick={() => toggleTicket(ticket.ticket_id)}
+              >
+                <div className="ticket-header">
+                  <div className="ticket-info">
+                    <div className="ticket-id">
+                      <TicketIcon size={16} />
+                      {ticket.ticket_id}
+                    </div>
+                    <div className="ticket-subject">{ticket.subject}</div>
+                  </div>
+
+                  <span
+                    className="status-badge"
+                    style={{ backgroundColor: getStatusColor(ticket.status) }}
+                  >
+                    {ticket.status}
+                  </span>
+                </div>
+
+                <div className="ticket-meta">
+                  <span 
+                    className="priority-badge"
+                    style={{ color: getPriorityColor(ticket.priority) }}
+                  >
+                    Priority: {ticket.priority}
+                  </span>
+                  <span className="category-badge">
+                    {ticket.category}
+                  </span>
+                </div>
+
+                {/* Expandable Section */}
+                {expandedTicket === ticket.ticket_id && (
+                  <div className="ticket-details">
+                    <div className="detail-section">
+                      <Clock size={16} />
+                      <div>
+                        <strong>Created:</strong>{" "}
+                        {new Date(ticket.created_at).toLocaleString()}
+                      </div>
+                    </div>
+
+                    {/* Assignment Info - ✅ FIXED: Show who's handling it */}
+                    {ticket.assigned_to && (
+                      <div className="detail-section assignment-info">
+                        <User size={16} />
+                        <div>
+                          <strong>Assigned to:</strong>{" "}
+                          {ticket.assigned_to}
+                          {ticket.assigned_role && (
+                            <span className="role-badge">
+                              {ticket.assigned_role}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="detail-section">
+                      <strong>Description:</strong>
+                      <p className="ticket-description">{ticket.description}</p>
+                    </div>
+
+                    {/* Admin Response - ✅ FIXED: Better display */}
+                    {ticket.admin_response && (
+                      <div className="response-section admin-response">
+                        <strong>Admin Response:</strong>
+                        <p>{ticket.admin_response}</p>
+                      </div>
+                    )}
+
+                    {/* Manager Response - ✅ FIXED: Now displayed! */}
+                    {ticket.manager_response && (
+                      <div className="response-section manager-response">
+                        <strong>Manager Response:</strong>
+                        <p>{ticket.manager_response}</p>
+                      </div>
+                    )}
+
+                    {/* No response yet */}
+                    {!ticket.admin_response && !ticket.manager_response && (
+                      <div className="response-section waiting">
+                        <p>⏳ Waiting for response from support team...</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="expand-indicator">
+                  {expandedTicket === ticket.ticket_id ? "▲ Click to collapse" : "▼ Click to expand"}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
