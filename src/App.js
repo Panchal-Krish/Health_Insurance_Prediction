@@ -1,32 +1,19 @@
-// import Header from "./components/Header";
-// import Home from "./pages/Home";
-
-// function App() {
-//   return (
-//     <>
-//       <Header />
-//       <Home />
-//     </>
-//   );
-// }
-
-// export default App;
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import { ProtectedRoute, RoleBasedRoute, GuestRoute } from './components/ProtectedRoute';
+
+// Pages
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Contact from './pages/Contact';
 import Predict from './pages/Predict';
-import HelpDesk from "./pages/HelpDesk";
-import AdminTickets from "./pages/AdminTickets";
-import AdminPanel from "./pages/AdminPanel";
-import ManagerDashboard from "./pages/ManagerDashboard";
-
+import HelpDesk from './pages/HelpDesk';
+import AdminPanel from './pages/AdminPanel';
+import ManagerDashboard from './pages/ManagerDashboard';
 
 import './styles/App.css';
 
@@ -37,22 +24,80 @@ function App() {
         <Header />
         <main className="main-content">
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Home />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/diseases" element={<div className="page-placeholder">Diseases Page</div>} />
-            <Route path="/ai-analysis" element={<div className="page-placeholder">AI Analysis Page</div>} />
-            <Route path="/how-it-works" element={<div className="page-placeholder">How it Works Page</div>} />
-            <Route path="/about" element={<div className="page-placeholder">About Us Page</div>} />
             <Route path="/contact" element={<Contact />} />
+
+            {/* Guest Routes (only for non-logged-in users) */}
+            <Route
+              path="/signin"
+              element={
+                <GuestRoute>
+                  <SignIn />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                <GuestRoute>
+                  <SignUp />
+                </GuestRoute>
+              }
+            />
+
+            {/* Protected Routes (require login) */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/predict"
+              element={
+                <ProtectedRoute>
+                  <Predict />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/helpdesk"
+              element={
+                <ProtectedRoute>
+                  <HelpDesk />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Admin Only Routes */}
+            <Route
+              path="/admin"
+              element={
+                <RoleBasedRoute allowedRoles={['admin']}>
+                  <AdminPanel />
+                </RoleBasedRoute>
+              }
+            />
+
+            {/* Manager Only Routes */}
+            <Route
+              path="/manager"
+              element={
+                <RoleBasedRoute allowedRoles={['manager']}>
+                  <ManagerDashboard />
+                </RoleBasedRoute>
+              }
+            />
+
+            {/* Placeholder Routes (for future implementation) */}
             <Route path="/privacy-policy" element={<div className="page-placeholder">Privacy Policy</div>} />
             <Route path="/terms-of-service" element={<div className="page-placeholder">Terms of Service</div>} />
-            <Route path="/predict" element={<Predict />} />
-            <Route path="/helpdesk" element={<HelpDesk />} />
-            <Route path="/admin-tickets" element={<AdminTickets />} />
-            <Route path="/admin" element={<AdminPanel />} />          
-            <Route path="/manager" element={<ManagerDashboard />} />
+
+            {/* 404 - Catch all */}
+            <Route path="*" element={<div className="page-placeholder">404 - Page Not Found</div>} />
           </Routes>
         </main>
         <Footer />
