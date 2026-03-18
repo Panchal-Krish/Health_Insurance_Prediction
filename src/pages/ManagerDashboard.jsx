@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Loader, AlertCircle, CheckCircle,
-  Briefcase, Ticket, RefreshCw, X, Clock
+import { 
+  Loader, AlertCircle, CheckCircle, 
+  Briefcase, Ticket, RefreshCw, X, Clock 
 } from "lucide-react";
 import { getToken, fetchWithAuth, getCurrentUser } from "../utils/auth";
 import "../styles/ManagerDashboard.css";
@@ -144,7 +144,7 @@ function ManagerDashboard() {
   // Stats
   const openTickets = tickets.filter(t => t.status === "Open").length;
   const inProgressTickets = tickets.filter(t => t.status === "In Progress").length;
-  const resolvedTickets = tickets.filter(t =>
+  const resolvedTickets = tickets.filter(t => 
     t.status.toLowerCase().includes("resolved") || t.status.toLowerCase().includes("closed")
   ).length;
 
@@ -170,7 +170,7 @@ function ManagerDashboard() {
             <p className="header-subtitle">Manage your assigned tickets</p>
           </div>
         </div>
-        <button
+        <button 
           className="refresh-btn"
           onClick={fetchTickets}
         >
@@ -234,8 +234,8 @@ function ManagerDashboard() {
       <div className="section-header">
         <h2>My Assigned Tickets ({filteredTickets.length})</h2>
         <div className="filters">
-          <select
-            value={statusFilter}
+          <select 
+            value={statusFilter} 
             onChange={(e) => setStatusFilter(e.target.value)}
             className="filter-select"
           >
@@ -243,8 +243,8 @@ function ManagerDashboard() {
               <option key={status} value={status}>{status}</option>
             ))}
           </select>
-          <select
-            value={priorityFilter}
+          <select 
+            value={priorityFilter} 
             onChange={(e) => setPriorityFilter(e.target.value)}
             className="filter-select"
           >
@@ -398,16 +398,16 @@ function ManagerDashboard() {
                 </small>
               </div>
               <div className="modal-actions">
-                <button
-                  type="button"
+                <button 
+                  type="button" 
                   className="secondary-btn"
                   onClick={closeResponseModal}
                   disabled={updatingTicket}
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
+                <button 
+                  type="submit" 
                   className="primary-btn"
                   disabled={updatingTicket}
                 >
