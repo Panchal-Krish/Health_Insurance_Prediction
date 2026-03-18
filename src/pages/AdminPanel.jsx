@@ -1,29 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Loader, AlertCircle, CheckCircle, UserPlus,
-  Shield, Ticket, Users, RefreshCw, X
+  Shield, Ticket, Users, RefreshCw, X, Mail, MailOpen
 } from "lucide-react";
 import { getToken, fetchWithAuth, getCurrentUser } from "../utils/auth";
 import "../styles/AdminPanel.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
+// Tabs available in the admin panel
+const TABS = { TICKETS: "tickets", MESSAGES: "messages" };
+
 function AdminPanel() {
   const navigate = useNavigate();
+  const successTimerRef = useRef(null);   // FIX #8: cleanup setTimeout on unmount
 
+  const [activeTab, setActiveTab] = useState(TABS.TICKETS);
   const [tickets, setTickets] = useState([]);
   const [managers, setManagers] = useState([]);
+  const [messages, setMessages] = useState([]);   // Option 4: contact messages
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
 
   // Manager creation
-  const [newManager, setNewManager] = useState({
-    fullName: "",
-    email: "",
-    password: ""
-  });
+  const [newManager, setNewManager] = useState({ fullName: "", email: "", password: "" });
   const [creatingManager, setCreatingManager] = useState(false);
   const [showManagerModal, setShowManagerModal] = useState(false);
 
@@ -34,12 +36,61 @@ function AdminPanel() {
   const [selectedStatus, setSelectedStatus] = useState("Open");
   const [updatingTicket, setUpdatingTicket] = useState(false);
 
+  // Assign dropdown state per ticket (controlled) — FIX #10
+  const [assignSelections, setAssignSelections] = useState({});
+
   // Filters
   const [statusFilter, setStatusFilter] = useState("All");
   const [priorityFilter, setPriorityFilter] = useState("All");
 
+  // FIX #8: Clear timer on unmount
   useEffect(() => {
-    // Check authentication and role
+    return () => {
+      if (successTimerRef.current) clearTimeout(successTimerRef.current);
+    };
+  }, []);
+
+  // FIX: Escape key closes any open modal
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        closeResponseModal();
+        setShowManagerModal(false);
+      }
+    };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, []);
+
+  const fetchTickets = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetchWithAuth(`${API_URL}/admin/all-tickets`);
+      if (!response.ok) throw new Error("Failed to fetch tickets");
+      setTickets(await response.json());
+    } catch (err) {
+      console.error("Error fetching tickets:", err);
+      setError("Unable to load tickets. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Defined BEFORE useEffect so it can be safely referenced
+  const fetchManagers = useCallback(async () => {
+    try {
+      const response = await fetchWithAuth(`${API_URL}/admin/managers`);
+      if (!response.ok) throw new Error("Failed to fetch managers");
+      setManagers(await response.json());
+      // Removed tickets.forEach — select handles missing keys with || "" already
+    } catch (err) {
+      console.error("Error fetching managers:", err);
+      setError("Unable to load managers list.");
+    }
+  }, []);
+
+  useEffect(() => {
     const token = getToken();
     const user = getCurrentUser();
 
@@ -50,65 +101,39 @@ function AdminPanel() {
 
     fetchTickets();
     fetchManagers();
-  }, [navigate]);
+    fetchMessages();
+  }, [navigate, fetchManagers]);
 
-  const fetchTickets = async () => {
-    setLoading(true);
-    setError(null);
-
+  // Option 4: fetch contact messages
+  const fetchMessages = async () => {
     try {
-      const response = await fetchWithAuth(`${API_URL}/admin/all-tickets`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch tickets");
-      }
-
-      const data = await response.json();
-      setTickets(data);
+      const response = await fetchWithAuth(`${API_URL}/admin/contacts`);
+      if (!response.ok) throw new Error("Failed to fetch messages");
+      setMessages(await response.json());
     } catch (err) {
-      console.error("Error fetching tickets:", err);
-      setError("Unable to load tickets. Please try again.");
-    } finally {
-      setLoading(false);
+      console.error("Error fetching contact messages:", err);
     }
   };
 
-  const fetchManagers = async () => {
-    try {
-      const response = await fetchWithAuth(`${API_URL}/admin/managers`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch managers");
-      }
-
-      const data = await response.json();
-      setManagers(data);
-    } catch (err) {
-      console.error("Error fetching managers:", err);
-    }
+  // FIX #10: Controlled assign dropdown — resets after assignment
+  const handleAssignChange = (ticket_id, managerEmail) => {
+    setAssignSelections(prev => ({ ...prev, [ticket_id]: managerEmail }));
   };
 
-  const assignTicket = async (ticket_id, managerEmail) => {
+  const assignTicket = async (ticket_id) => {
+    const managerEmail = assignSelections[ticket_id];
     if (!managerEmail) return;
 
     try {
-      const response = await fetchWithAuth(
-        `${API_URL}/admin/assign-ticket`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            ticket_id,
-            assigned_to: managerEmail,
-            assigned_role: "manager"
-          })
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to assign ticket");
-      }
+      const response = await fetchWithAuth(`${API_URL}/admin/assign-ticket`, {
+        method: "POST",
+        body: JSON.stringify({ ticket_id, assigned_to: managerEmail, assigned_role: "manager" })
+      });
+      if (!response.ok) throw new Error("Failed to assign ticket");
 
       showSuccess("Ticket assigned successfully");
+      // Reset this ticket's dropdown
+      setAssignSelections(prev => ({ ...prev, [ticket_id]: "" }));
       fetchTickets();
     } catch (err) {
       console.error("Error assigning ticket:", err);
@@ -116,12 +141,12 @@ function AdminPanel() {
     }
   };
 
-  const openResponseModal = (ticket) => {
+  const openResponseModal = useCallback((ticket) => {
     setCurrentTicket(ticket);
     setSelectedStatus(ticket.status);
     setAdminResponse(ticket.admin_response || "");
     setShowResponseModal(true);
-  };
+  }, []);
 
   const closeResponseModal = () => {
     setShowResponseModal(false);
@@ -132,7 +157,6 @@ function AdminPanel() {
 
   const updateTicket = async (e) => {
     e.preventDefault();
-
     if (!currentTicket) return;
 
     if (adminResponse.trim().length < 10) {
@@ -146,18 +170,9 @@ function AdminPanel() {
     try {
       const response = await fetchWithAuth(
         `${API_URL}/admin/update-ticket/${currentTicket.ticket_id}`,
-        {
-          method: "PUT",
-          body: JSON.stringify({
-            status: selectedStatus,
-            admin_response: adminResponse.trim()
-          })
-        }
+        { method: "PUT", body: JSON.stringify({ status: selectedStatus, admin_response: adminResponse.trim() }) }
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to update ticket");
-      }
+      if (!response.ok) throw new Error("Failed to update ticket");
 
       showSuccess("Ticket updated successfully");
       closeResponseModal();
@@ -173,12 +188,10 @@ function AdminPanel() {
   const createManager = async (e) => {
     e.preventDefault();
 
-    // Validation
     if (newManager.fullName.trim().length < 3) {
       setError("Full name must be at least 3 characters");
       return;
     }
-
     if (newManager.password.length < 6) {
       setError("Password must be at least 6 characters");
       return;
@@ -188,18 +201,14 @@ function AdminPanel() {
     setError(null);
 
     try {
-      const response = await fetchWithAuth(
-        `${API_URL}/admin/create-manager`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            fullName: newManager.fullName.trim(),
-            email: newManager.email.trim().toLowerCase(),
-            password: newManager.password
-          })
-        }
-      );
-
+      const response = await fetchWithAuth(`${API_URL}/admin/create-manager`, {
+        method: "POST",
+        body: JSON.stringify({
+          fullName: newManager.fullName.trim(),
+          email: newManager.email.trim().toLowerCase(),
+          password: newManager.password
+        })
+      });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to create manager");
@@ -217,21 +226,53 @@ function AdminPanel() {
     }
   };
 
-  const showSuccess = (message) => {
-    setSuccessMessage(message);
-    setTimeout(() => setSuccessMessage(""), 5000);
+  // Option 4: mark a contact message as read
+  const markAsRead = async (messageId) => {
+    try {
+      const response = await fetchWithAuth(
+        `${API_URL}/admin/contacts/${messageId}/read`,
+        { method: "PUT" }
+      );
+      if (!response.ok) throw new Error("Failed to mark as read");
+      setMessages(prev =>
+        prev.map(m => m._id === messageId ? { ...m, status: "read" } : m)
+      );
+    } catch (err) {
+      console.error("Error marking message read:", err);
+      setError("Failed to mark message as read");
+    }
   };
 
-  // Filter tickets
-  const filteredTickets = tickets.filter((ticket) => {
-    const statusMatch = statusFilter === "All" || ticket.status === statusFilter;
-    const priorityMatch = priorityFilter === "All" || ticket.priority === priorityFilter;
-    return statusMatch && priorityMatch;
-  });
+  // FIX #8: use ref to track timeout so it can be cleared on unmount
+  const showSuccess = (message) => {
+    setSuccessMessage(message);
+    if (successTimerRef.current) clearTimeout(successTimerRef.current);
+    successTimerRef.current = setTimeout(() => setSuccessMessage(""), 5000);
+  };
 
-  // Get unique statuses and priorities
-  const statuses = ["All", ...new Set(tickets.map(t => t.status))];
-  const priorities = ["All", ...new Set(tickets.map(t => t.priority))];
+  // FIX #29: useMemo for derived filter lists
+  const filteredTickets = useMemo(() =>
+    tickets.filter(ticket => {
+      const statusMatch = statusFilter === "All" || ticket.status === statusFilter;
+      const priorityMatch = priorityFilter === "All" || ticket.priority === priorityFilter;
+      return statusMatch && priorityMatch;
+    }),
+    [tickets, statusFilter, priorityFilter]
+  );
+
+  const statuses = useMemo(() => ["All", ...new Set(tickets.map(t => t.status))], [tickets]);
+  const priorities = useMemo(() => ["All", ...new Set(tickets.map(t => t.priority))], [tickets]);
+
+  // FIX #26: strict equality for resolved count
+  const resolvedCount = useMemo(() =>
+    tickets.filter(t => t.status === "Resolved").length,
+    [tickets]
+  );
+
+  const unreadCount = useMemo(() =>
+    messages.filter(m => m.status === "unread").length,
+    [messages]
+  );
 
   if (loading && tickets.length === 0) {
     return (
@@ -252,34 +293,30 @@ function AdminPanel() {
           <Shield className="header-icon" />
           <div>
             <h1>Admin Panel</h1>
-            <p className="header-subtitle">Manage tickets and team members</p>
+            <p className="header-subtitle">Manage tickets, team, and contact messages</p>
           </div>
         </div>
         <button
           className="refresh-btn"
-          onClick={() => { fetchTickets(); fetchManagers(); }}
+          onClick={() => { fetchTickets(); fetchManagers(); fetchMessages(); }}
         >
           <RefreshCw size={16} />
           Refresh
         </button>
       </div>
 
-      {/* Success Message */}
+      {/* Alerts */}
       {successMessage && (
         <div className="success-message">
           <CheckCircle className="success-icon" />
           <span>{successMessage}</span>
         </div>
       )}
-
-      {/* Error Message */}
       {error && (
         <div className="error-message">
           <AlertCircle className="error-icon" />
           <span>{error}</span>
-          <button onClick={() => setError(null)} className="close-btn">
-            <X size={16} />
-          </button>
+          <button onClick={() => setError(null)} className="close-btn"><X size={16} /></button>
         </div>
       )}
 
@@ -299,147 +336,222 @@ function AdminPanel() {
             <div className="stat-label">Managers</div>
           </div>
         </div>
+        {/* FIX #26: strict equality for resolved count */}
         <div className="stat-card">
           <CheckCircle className="stat-icon success" />
           <div className="stat-info">
-            <div className="stat-value">
-              {tickets.filter(t => t.status.toLowerCase().includes("resolved")).length}
-            </div>
+            <div className="stat-value">{resolvedCount}</div>
             <div className="stat-label">Resolved</div>
+          </div>
+        </div>
+        <div className="stat-card">
+          <Mail className="stat-icon" />
+          <div className="stat-info">
+            <div className="stat-value">{unreadCount}</div>
+            <div className="stat-label">Unread Messages</div>
           </div>
         </div>
       </div>
 
-      {/* Create Manager Button */}
-      <div className="section-header">
-        <h2>Team Management</h2>
+      {/* Tabs */}
+      <div className="admin-tabs">
         <button
-          className="primary-btn"
-          onClick={() => setShowManagerModal(true)}
+          className={`tab-btn ${activeTab === TABS.TICKETS ? "active" : ""}`}
+          onClick={() => setActiveTab(TABS.TICKETS)}
         >
-          <UserPlus size={16} />
-          Create Manager
+          <Ticket size={16} />
+          Tickets
+        </button>
+        <button
+          className={`tab-btn ${activeTab === TABS.MESSAGES ? "active" : ""}`}
+          onClick={() => setActiveTab(TABS.MESSAGES)}
+        >
+          <Mail size={16} />
+          Messages
+          {unreadCount > 0 && (
+            <span className="tab-badge">{unreadCount}</span>
+          )}
         </button>
       </div>
 
-      {/* Managers List */}
-      {managers.length > 0 && (
-        <div className="managers-list">
-          {managers.map((manager) => (
-            <div key={manager.email} className="manager-card">
-              <Users className="manager-icon" />
-              <div className="manager-info">
-                <div className="manager-name">{manager.fullName}</div>
-                <div className="manager-email">{manager.email}</div>
-              </div>
+      {/* ===================== TICKETS TAB ===================== */}
+      {activeTab === TABS.TICKETS && (
+        <>
+          {/* Team Management */}
+          <div className="section-header">
+            <h2>Team Management</h2>
+            <button className="primary-btn" onClick={() => setShowManagerModal(true)}>
+              <UserPlus size={16} />
+              Create Manager
+            </button>
+          </div>
+
+          {managers.length > 0 && (
+            <div className="managers-list">
+              {managers.map((manager) => (
+                <div key={manager.email} className="manager-card">
+                  <Users className="manager-icon" />
+                  <div className="manager-info">
+                    <div className="manager-name">{manager.fullName}</div>
+                    <div className="manager-email">{manager.email}</div>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          )}
+
+          {/* Tickets Section */}
+          <div className="section-header">
+            <h2>Support Tickets ({filteredTickets.length})</h2>
+            <div className="filters">
+              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="filter-select">
+                {statuses.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className="filter-select">
+                {priorities.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className="table-container">
+            <table className="ticket-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>User</th>
+                  <th>Subject</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Assigned To</th>
+                  <th>Manager Notes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTickets.length === 0 ? (
+                  <tr><td colSpan="8" className="empty-row">No tickets match your filters</td></tr>
+                ) : (
+                  filteredTickets.map((ticket) => (
+                    <tr key={ticket.ticket_id}>
+                      <td className="ticket-id-cell">{ticket.ticket_id}</td>
+                      <td>{ticket.email}</td>
+                      <td className="subject-cell">{ticket.subject}</td>
+                      <td>
+                        <span className={`priority-badge ${ticket.priority.toLowerCase()}`}>
+                          {ticket.priority}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`status-badge ${ticket.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                          {ticket.status}
+                        </span>
+                      </td>
+                      <td>{ticket.assigned_to || "Unassigned"}</td>
+                      <td className="notes-cell">{ticket.manager_response || "—"}</td>
+                      <td className="actions-cell">
+                        {/* FIX #10: Controlled select with explicit Assign button */}
+                        <select
+                          value={assignSelections[ticket.ticket_id] || ""}
+                          onChange={(e) => handleAssignChange(ticket.ticket_id, e.target.value)}
+                          className="assign-select"
+                        >
+                          <option value="">Assign...</option>
+                          {managers.map((m) => (
+                            <option key={m.email} value={m.email}>{m.fullName}</option>
+                          ))}
+                        </select>
+                        <button
+                          className="action-btn assign"
+                          onClick={() => assignTicket(ticket.ticket_id)}
+                          disabled={!assignSelections[ticket.ticket_id]}
+                          title="Confirm assignment"
+                        >
+                          Assign
+                        </button>
+                        <button
+                          className="action-btn"
+                          onClick={() => openResponseModal(ticket)}
+                        >
+                          Update
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
-      {/* Tickets Section */}
-      <div className="section-header">
-        <h2>Support Tickets ({filteredTickets.length})</h2>
-        <div className="filters">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="filter-select"
-          >
-            {statuses.map(status => (
-              <option key={status} value={status}>{status}</option>
-            ))}
-          </select>
-          <select
-            value={priorityFilter}
-            onChange={(e) => setPriorityFilter(e.target.value)}
-            className="filter-select"
-          >
-            {priorities.map(priority => (
-              <option key={priority} value={priority}>{priority}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Tickets Table */}
-      <div className="table-container">
-        <table className="ticket-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>User</th>
-              <th>Subject</th>
-              <th>Priority</th>
-              <th>Status</th>
-              <th>Assigned To</th>
-              <th>Manager Notes</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredTickets.length === 0 ? (
-              <tr>
-                <td colSpan="8" className="empty-row">
-                  No tickets match your filters
-                </td>
-              </tr>
-            ) : (
-              filteredTickets.map((ticket) => (
-                <tr key={ticket.ticket_id}>
-                  <td className="ticket-id-cell">{ticket.ticket_id}</td>
-                  <td>{ticket.email}</td>
-                  <td className="subject-cell">{ticket.subject}</td>
-                  <td>
-                    <span className={`priority-badge ${ticket.priority.toLowerCase()}`}>
-                      {ticket.priority}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`status-badge ${ticket.status.toLowerCase().replace(/\s+/g, '-')}`}>
-                      {ticket.status}
-                    </span>
-                  </td>
-                  <td>{ticket.assigned_to || "Unassigned"}</td>
-                  <td className="notes-cell">
-                    {ticket.manager_response || "—"}
-                  </td>
-                  <td className="actions-cell">
-                    <select
-                      defaultValue=""
-                      onChange={(e) => assignTicket(ticket.ticket_id, e.target.value)}
-                      className="assign-select"
-                    >
-                      <option value="">Assign...</option>
-                      {managers.map((m) => (
-                        <option key={m.email} value={m.email}>
-                          {m.fullName}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      className="action-btn"
-                      onClick={() => openResponseModal(ticket)}
-                    >
-                      Update
-                    </button>
-                  </td>
-                </tr>
-              ))
+      {/* ===================== MESSAGES TAB (Option 4) ===================== */}
+      {activeTab === TABS.MESSAGES && (
+        <>
+          <div className="section-header">
+            <h2>Contact Messages ({messages.length})</h2>
+            {unreadCount > 0 && (
+              <span className="unread-badge">{unreadCount} unread</span>
             )}
-          </tbody>
-        </table>
-      </div>
+          </div>
 
-      {/* Create Manager Modal */}
+          {messages.length === 0 ? (
+            <div className="empty-state">
+              <Mail className="empty-icon" />
+              <p>No contact messages yet</p>
+            </div>
+          ) : (
+            <div className="messages-list">
+              {messages.map((msg) => (
+                <div
+                  key={msg._id}
+                  className={`message-card ${msg.status === "unread" ? "unread" : "read"}`}
+                >
+                  <div className="message-header">
+                    <div className="message-meta">
+                      <span className="message-name">{msg.name}</span>
+                      <span className="message-email">{msg.email}</span>
+                      <span className="message-date">
+                        {new Date(msg.created_at).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="message-actions">
+                      {msg.status === "unread" ? (
+                        <span className="unread-dot" title="Unread" />
+                      ) : (
+                        <MailOpen size={16} className="read-icon" title="Read" />
+                      )}
+                      {msg.status === "unread" && (
+                        <button
+                          className="action-btn small"
+                          onClick={() => markAsRead(msg._id)}
+                          title="Mark as read"
+                        >
+                          Mark Read
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="message-subject">
+                    <strong>{msg.subject}</strong>
+                  </div>
+                  <div className="message-body">
+                    {msg.message}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ===================== CREATE MANAGER MODAL ===================== */}
       {showManagerModal && (
         <div className="modal-overlay" onClick={() => setShowManagerModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Create New Manager</h3>
-              <button onClick={() => setShowManagerModal(false)} className="close-btn">
-                <X size={20} />
-              </button>
+              <button onClick={() => setShowManagerModal(false)} className="close-btn"><X size={20} /></button>
             </div>
             <form onSubmit={createManager}>
               <div className="form-group">
@@ -477,27 +589,11 @@ function AdminPanel() {
                 />
               </div>
               <div className="modal-actions">
-                <button
-                  type="button"
-                  className="secondary-btn"
-                  onClick={() => setShowManagerModal(false)}
-                  disabled={creatingManager}
-                >
+                <button type="button" className="secondary-btn" onClick={() => setShowManagerModal(false)} disabled={creatingManager}>
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="primary-btn"
-                  disabled={creatingManager}
-                >
-                  {creatingManager ? (
-                    <>
-                      <Loader className="spinner" />
-                      Creating...
-                    </>
-                  ) : (
-                    "Create Manager"
-                  )}
+                <button type="submit" className="primary-btn" disabled={creatingManager}>
+                  {creatingManager ? <><Loader className="spinner" /> Creating...</> : "Create Manager"}
                 </button>
               </div>
             </form>
@@ -505,15 +601,13 @@ function AdminPanel() {
         </div>
       )}
 
-      {/* Update Ticket Modal */}
+      {/* ===================== UPDATE TICKET MODAL ===================== */}
       {showResponseModal && currentTicket && (
         <div className="modal-overlay" onClick={closeResponseModal}>
           <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>Update Ticket: {currentTicket.ticket_id}</h3>
-              <button onClick={closeResponseModal} className="close-btn">
-                <X size={20} />
-              </button>
+              <button onClick={closeResponseModal} className="close-btn"><X size={20} /></button>
             </div>
             <div className="ticket-info-box">
               <p><strong>User:</strong> {currentTicket.email}</p>
@@ -523,11 +617,7 @@ function AdminPanel() {
             <form onSubmit={updateTicket}>
               <div className="form-group">
                 <label>Status *</label>
-                <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  disabled={updatingTicket}
-                >
+                <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} disabled={updatingTicket}>
                   <option value="Open">Open</option>
                   <option value="In Progress">In Progress</option>
                   <option value="Waiting Admin">Waiting Admin</option>
@@ -548,27 +638,11 @@ function AdminPanel() {
                 />
               </div>
               <div className="modal-actions">
-                <button
-                  type="button"
-                  className="secondary-btn"
-                  onClick={closeResponseModal}
-                  disabled={updatingTicket}
-                >
+                <button type="button" className="secondary-btn" onClick={closeResponseModal} disabled={updatingTicket}>
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="primary-btn"
-                  disabled={updatingTicket}
-                >
-                  {updatingTicket ? (
-                    <>
-                      <Loader className="spinner" />
-                      Updating...
-                    </>
-                  ) : (
-                    "Update Ticket"
-                  )}
+                <button type="submit" className="primary-btn" disabled={updatingTicket}>
+                  {updatingTicket ? <><Loader className="spinner" /> Updating...</> : "Update Ticket"}
                 </button>
               </div>
             </form>

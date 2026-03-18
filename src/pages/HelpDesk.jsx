@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Loader, AlertCircle, CheckCircle, Ticket as TicketIcon, User, Clock } from "lucide-react";
-import { getToken, fetchWithAuth } from "../utils/auth";
-import "./../styles/HelpDesk.css";
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Loader, AlertCircle, CheckCircle, Ticket as TicketIcon, User, Clock } from 'lucide-react';
+import { fetchWithAuth } from '../utils/auth';
+import './../styles/HelpDesk.css';
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 function HelpDesk() {
   const navigate = useNavigate();
+  const successTimerRef = useRef(null);   // FIX #8: cleanup on unmount
 
   const [form, setForm] = useState({
-    subject: "",
-    description: "",
-    category: "Model Issue",
-    priority: "Medium"
+    subject: '',
+    description: '',
+    category: 'Model Issue',
+    priority: 'Medium'
   });
 
   const [tickets, setTickets] = useState([]);
@@ -21,85 +22,70 @@ function HelpDesk() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // FIX #8: clear timer on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) clearTimeout(successTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
-    // Check authentication
-    const token = getToken();
-    if (!token) {
-      navigate("/signin");
-      return;
-    }
-
-    // Fetch tickets
+    // ProtectedRoute already handles unauthenticated users — no duplicate check needed
     fetchTickets();
-  }, [navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    // Clear error when user types
     if (error) setError(null);
   };
 
   const submitTicket = async (e) => {
     e.preventDefault();
 
-    // Validation
     if (form.subject.trim().length < 5) {
-      setError("Subject must be at least 5 characters long");
+      setError('Subject must be at least 5 characters long');
       return;
     }
-
     if (form.description.trim().length < 10) {
-      setError("Description must be at least 10 characters long");
+      setError('Description must be at least 10 characters long');
       return;
     }
 
     setSubmitting(true);
     setError(null);
-    setSuccessMessage("");
+    setSuccessMessage('');
 
     try {
-      const response = await fetchWithAuth(
-        `${API_URL}/create-ticket`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            subject: form.subject.trim(),
-            description: form.description.trim(),
-            category: form.category,
-            priority: form.priority
-          })
-        }
-      );
+      const response = await fetchWithAuth(`${API_URL}/create-ticket`, {
+        method: 'POST',
+        body: JSON.stringify({
+          subject: form.subject.trim(),
+          description: form.description.trim(),
+          category: form.category,
+          priority: form.priority
+        })
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to submit ticket");
+        throw new Error(errorData.message || 'Failed to submit ticket');
       }
 
       const data = await response.json();
-
-      // Show success message
       setSuccessMessage(`Ticket ${data.ticket_id} created successfully!`);
-
-      // Reset form
-      setForm({
-        subject: "",
-        description: "",
-        category: "Model Issue",
-        priority: "Medium"
-      });
-
-      // Refresh tickets
+      setForm({ subject: '', description: '', category: 'Model Issue', priority: 'Medium' });
       await fetchTickets();
 
-      // Clear success message after 5 seconds
-      setTimeout(() => setSuccessMessage(""), 5000);
+      // FIX #8: tracked timeout so it clears on unmount
+      if (successTimerRef.current) clearTimeout(successTimerRef.current);
+      successTimerRef.current = setTimeout(() => setSuccessMessage(''), 5000);
 
     } catch (err) {
-      console.error("Error submitting ticket:", err);
-      setError(err.message || "Unable to submit ticket. Please try again.");
+      console.error('Error submitting ticket:', err);
+      setError(err.message || 'Unable to submit ticket. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -108,29 +94,14 @@ function HelpDesk() {
   const fetchTickets = async () => {
     setLoading(true);
     setError(null);
-
     try {
-      const storage = localStorage.getItem('token') ? localStorage : sessionStorage;
-      const email = storage.getItem('userEmail');
-
-      if (!email) {
-        throw new Error("User email not found");
-      }
-
-      const response = await fetchWithAuth(
-        `${API_URL}/my-tickets/${email}`
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch tickets");
-      }
-
-      const data = await response.json();
-      setTickets(data);
-
+      // FIX: No email in URL — backend reads it from JWT token
+      const response = await fetchWithAuth(`${API_URL}/my-tickets`);
+      if (!response.ok) throw new Error('Failed to fetch tickets');
+      setTickets(await response.json());
     } catch (err) {
-      console.error("Error fetching tickets:", err);
-      setError("Unable to load your tickets. Please try again.");
+      console.error('Error fetching tickets:', err);
+      setError('Unable to load your tickets. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -141,21 +112,20 @@ function HelpDesk() {
   };
 
   const getStatusColor = (status) => {
-    const statusLower = status.toLowerCase();
-    if (statusLower.includes("open")) return "#3b82f6";
-    if (statusLower.includes("progress")) return "#f59e0b";
-    if (statusLower.includes("resolved") || statusLower.includes("closed")) return "#10b981";
-    if (statusLower.includes("waiting")) return "#8b5cf6";
-    return "#6b7280";
+    const s = status.toLowerCase();
+    if (s.includes('open')) return '#3b82f6';
+    if (s.includes('progress')) return '#f59e0b';
+    if (s.includes('resolved') || s.includes('closed')) return '#10b981';
+    if (s.includes('waiting')) return '#8b5cf6';
+    return '#6b7280';
   };
 
   const getPriorityColor = (priority) => {
-    if (priority === "High") return "#ef4444";
-    if (priority === "Medium") return "#f59e0b";
-    return "#22c55e";
+    if (priority === 'High') return '#ef4444';
+    if (priority === 'Medium') return '#f59e0b';
+    return '#22c55e';
   };
 
-  // Loading state
   if (loading && tickets.length === 0) {
     return (
       <div className="helpdesk-container">
@@ -177,7 +147,6 @@ function HelpDesk() {
         </div>
       </div>
 
-      {/* Success Message */}
       {successMessage && (
         <div className="success-message">
           <CheckCircle className="success-icon" />
@@ -185,7 +154,6 @@ function HelpDesk() {
         </div>
       )}
 
-      {/* Error Message */}
       {error && (
         <div className="error-message">
           <AlertCircle className="error-icon" />
@@ -196,7 +164,6 @@ function HelpDesk() {
       {/* Ticket Form */}
       <div className="ticket-form-card">
         <h3>Create Support Ticket</h3>
-
         <form onSubmit={submitTicket}>
           <div className="form-row">
             <div className="form-group">
@@ -211,15 +178,9 @@ function HelpDesk() {
                 maxLength={100}
               />
             </div>
-
             <div className="form-group">
               <label>Priority *</label>
-              <select
-                name="priority"
-                value={form.priority}
-                onChange={handleChange}
-                disabled={submitting}
-              >
+              <select name="priority" value={form.priority} onChange={handleChange} disabled={submitting}>
                 <option value="Low">Low</option>
                 <option value="Medium">Medium</option>
                 <option value="High">High</option>
@@ -239,20 +200,13 @@ function HelpDesk() {
               rows={5}
               maxLength={1000}
             />
-            <small className="char-count">
-              {form.description.length}/1000 characters
-            </small>
+            <small className="char-count">{form.description.length}/1000 characters</small>
           </div>
 
           <div className="form-row">
             <div className="form-group">
               <label>Category *</label>
-              <select
-                name="category"
-                value={form.category}
-                onChange={handleChange}
-                disabled={submitting}
-              >
+              <select name="category" value={form.category} onChange={handleChange} disabled={submitting}>
                 <option value="Model Issue">Model Issue</option>
                 <option value="Prediction Error">Prediction Error</option>
                 <option value="Technical Problem">Technical Problem</option>
@@ -260,29 +214,16 @@ function HelpDesk() {
                 <option value="Other">Other</option>
               </select>
             </div>
-
-            <button 
-              type="submit" 
-              className="submit-btn"
-              disabled={submitting}
-            >
-              {submitting ? (
-                <>
-                  <Loader className="spinner" />
-                  Submitting...
-                </>
-              ) : (
-                "Submit Ticket"
-              )}
+            <button type="submit" className="submit-btn" disabled={submitting}>
+              {submitting ? <><Loader className="spinner" />Submitting...</> : 'Submit Ticket'}
             </button>
           </div>
         </form>
       </div>
 
-      {/* Tickets Section */}
+      {/* Tickets List */}
       <div className="tickets-section">
         <h2 className="section-title">My Tickets ({tickets.length})</h2>
-
         <div className="tickets-grid">
           {tickets.length === 0 ? (
             <div className="empty-state">
@@ -292,62 +233,38 @@ function HelpDesk() {
             </div>
           ) : (
             tickets.map((ticket) => (
-              <div
-                key={ticket.ticket_id}
-                className="ticket-card"
-                onClick={() => toggleTicket(ticket.ticket_id)}
-              >
+              <div key={ticket.ticket_id} className="ticket-card" onClick={() => toggleTicket(ticket.ticket_id)}>
                 <div className="ticket-header">
                   <div className="ticket-info">
-                    <div className="ticket-id">
-                      <TicketIcon size={16} />
-                      {ticket.ticket_id}
-                    </div>
+                    <div className="ticket-id"><TicketIcon size={16} />{ticket.ticket_id}</div>
                     <div className="ticket-subject">{ticket.subject}</div>
                   </div>
-
-                  <span
-                    className="status-badge"
-                    style={{ backgroundColor: getStatusColor(ticket.status) }}
-                  >
+                  <span className="status-badge" style={{ backgroundColor: getStatusColor(ticket.status) }}>
                     {ticket.status}
                   </span>
                 </div>
 
                 <div className="ticket-meta">
-                  <span 
-                    className="priority-badge"
-                    style={{ color: getPriorityColor(ticket.priority) }}
-                  >
+                  <span className="priority-badge" style={{ color: getPriorityColor(ticket.priority) }}>
                     Priority: {ticket.priority}
                   </span>
-                  <span className="category-badge">
-                    {ticket.category}
-                  </span>
+                  <span className="category-badge">{ticket.category}</span>
                 </div>
 
-                {/* Expandable Section */}
                 {expandedTicket === ticket.ticket_id && (
                   <div className="ticket-details">
                     <div className="detail-section">
                       <Clock size={16} />
-                      <div>
-                        <strong>Created:</strong>{" "}
-                        {new Date(ticket.created_at).toLocaleString()}
-                      </div>
+                      <div><strong>Created:</strong> {new Date(ticket.created_at).toLocaleString()}</div>
                     </div>
 
-                    {/* Assignment Info - ✅ FIXED: Show who's handling it */}
                     {ticket.assigned_to && (
                       <div className="detail-section assignment-info">
                         <User size={16} />
                         <div>
-                          <strong>Assigned to:</strong>{" "}
-                          {ticket.assigned_to}
+                          <strong>Assigned to:</strong> {ticket.assigned_to}
                           {ticket.assigned_role && (
-                            <span className="role-badge">
-                              {ticket.assigned_role}
-                            </span>
+                            <span className="role-badge">{ticket.assigned_role}</span>
                           )}
                         </div>
                       </div>
@@ -358,7 +275,6 @@ function HelpDesk() {
                       <p className="ticket-description">{ticket.description}</p>
                     </div>
 
-                    {/* Admin Response - ✅ FIXED: Better display */}
                     {ticket.admin_response && (
                       <div className="response-section admin-response">
                         <strong>Admin Response:</strong>
@@ -366,7 +282,6 @@ function HelpDesk() {
                       </div>
                     )}
 
-                    {/* Manager Response - ✅ FIXED: Now displayed! */}
                     {ticket.manager_response && (
                       <div className="response-section manager-response">
                         <strong>Manager Response:</strong>
@@ -374,7 +289,6 @@ function HelpDesk() {
                       </div>
                     )}
 
-                    {/* No response yet */}
                     {!ticket.admin_response && !ticket.manager_response && (
                       <div className="response-section waiting">
                         <p>⏳ Waiting for response from support team...</p>
@@ -384,7 +298,7 @@ function HelpDesk() {
                 )}
 
                 <div className="expand-indicator">
-                  {expandedTicket === ticket.ticket_id ? "▲ Click to collapse" : "▼ Click to expand"}
+                  {expandedTicket === ticket.ticket_id ? '▲ Click to collapse' : '▼ Click to expand'}
                 </div>
               </div>
             ))

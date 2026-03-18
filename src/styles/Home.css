@@ -1,3 +1,239 @@
+/* .hero {
+    height: 585px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 20px;
+    background:
+        radial-gradient(circle at left, #ede9fe, transparent 40%),
+        radial-gradient(circle at right, #fde2e2, transparent 40%);
+}
+
+.badge {
+    background: #7c3aed;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.hero h1 {
+    font-size: 75px;
+    margin: 0;
+    font-weight: bolder;
+    color: #1f2937;
+}
+    
+.hero h1 span {
+    color: #2563eb;
+}
+
+.hero p {
+    max-width: 780px;
+    margin-top: 20px;
+    font-size: 24px;
+    color: #4b5563;
+    line-height: 2rem;
+}
+
+.buttons {
+    margin-top: 40px;
+    display: flex;
+    gap: 20px;
+}
+
+.primary {
+    background: #2563eb;
+    color: white;
+    padding: 14px 28px;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.secondary {
+    background: transparent;
+    color: #6c47ff;
+    padding: 14px 28px;
+    border-radius: 12px;
+    border: 2px solid #6c47ff;
+    font-size: 16px;
+    cursor: pointer;
+} */
+/* ================= HERO SECTION ================= */
+/* ================= HERO SECTION ================= */
+.hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 120px 32px;
+  background: #0b0b0b;
+  border-bottom: 1px solid #1f1f1f;
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #facc15;
+  color: #000;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 32px;
+}
+
+.hero h1 {
+  font-size: 68px;
+  font-weight: 800;
+  color: #facc15;
+  /* Yellow heading */
+  line-height: 1.15;
+  margin-bottom: 24px;
+}
+
+.hero h1 span {
+  color: #ffffff;
+}
+
+/* Subtitle */
+.hero p {
+  max-width: 820px;
+  margin: 0 auto 64px;
+  font-size: 20px;
+  color: #a1a1aa;
+  line-height: 1.7;
+}
+
+/* Buttons */
+.buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.primary,
+.secondary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 32px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.primary {
+  background: #facc15;
+  color: #000;
+  box-shadow: 0 10px 30px rgba(250, 204, 21, 0.3);
+}
+
+.primary:hover {
+  background: #fde047;
+  transform: translateY(-2px);
+}
+
+.secondary {
+  background: transparent;
+  color: #facc15;
+  border: 1px solid #facc15;
+}
+
+.secondary:hover {
+  background: #facc15;
+  color: #000;
+}
+
+.trust-section {
+  padding: 100px 32px;
+  background: #0b0b0b;
+}
+
+.trust-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.trust-title {
+  font-size: 44px;
+  font-weight: 800;
+  color: #facc15;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.trust-subtitle {
+  font-size: 18px;
+  color: #9ca3af;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 72px;
+}
+
+/* Cards */
+.trust-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.trust-card {
+  background: #111111;
+  padding: 48px 36px;
+  border-radius: 18px;
+  border: 1px solid #1f1f1f;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.trust-card:hover {
+  transform: translateY(-8px);
+  border-color: #facc15;
+}
+
+/* Icon */
+.trust-icon {
+  width: 72px;
+  height: 72px;
+  background: #facc15;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 28px;
+}
+
+.trust-icon .icon {
+  width: 32px;
+  height: 32px;
+  color: #000;
+}
+
+.trust-card-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #facc15;
+  margin-bottom: 16px;
+}
+
+.trust-card-description {
+  font-size: 15px;
+  color: #d1d5db;
+  line-height: 1.8;
+}
+
 /* How It Works Section */
 .how-it-works {
   padding: 80px 20px;

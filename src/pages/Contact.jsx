@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Mail, Phone, MapPin, Send, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { isAuthenticated } from '../utils/auth';
 import "./../styles/Contact.css";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 function Contact() {
     const navigate = useNavigate();
+    const successTimerRef = useRef(null);   // FIX #8: track timer for cleanup
 
     const [formData, setFormData] = useState({
         name: '',
@@ -14,32 +17,34 @@ function Contact() {
         message: ''
     });
 
-    const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
-    const [error, setError] = useState('');
+    const [loading, setLoading]   = useState(false);
+    const [success, setSuccess]   = useState(false);
+    const [error, setError]       = useState('');
+
+    // FIX #8: Clear the success-hide timer when component unmounts
+    useEffect(() => {
+        return () => {
+            if (successTimerRef.current) clearTimeout(successTimerRef.current);
+        };
+    }, []);
 
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+        setFormData({ ...formData, [e.target.name]: e.target.value });
         if (error) setError('');
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validation
+        // Client-side validation (mirrors backend rules)
         if (formData.name.trim().length < 3) {
             setError('Name must be at least 3 characters long');
             return;
         }
-
         if (formData.subject.trim().length < 5) {
             setError('Subject must be at least 5 characters long');
             return;
         }
-
         if (formData.message.trim().length < 20) {
             setError('Message must be at least 20 characters long');
             return;
@@ -48,22 +53,40 @@ function Contact() {
         setLoading(true);
         setError('');
 
-        // Simulate sending (since there's no backend endpoint)
-        setTimeout(() => {
-            setLoading(false);
-            setSuccess(true);
-
-            // Reset form
-            setFormData({
-                name: '',
-                email: '',
-                subject: '',
-                message: ''
+        try {
+            // FIX: Real API call — no more fake setTimeout
+            const response = await fetch(`${API_URL}/contact`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name:    formData.name.trim(),
+                    email:   formData.email.trim().toLowerCase(),
+                    subject: formData.subject.trim(),
+                    message: formData.message.trim()
+                })
             });
 
-            // Hide success message after 10 seconds
-            setTimeout(() => setSuccess(false), 10000);
-        }, 1000);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to send message');
+            }
+
+            // FIX #9: Save email before resetting form so success message can show it
+            const submittedEmail = formData.email.trim();
+
+            setSuccess(submittedEmail);   // store email in success state
+            setFormData({ name: '', email: '', subject: '', message: '' });
+
+            // Auto-hide success after 10 seconds — with cleanup ref
+            successTimerRef.current = setTimeout(() => setSuccess(false), 10000);
+
+        } catch (err) {
+            console.error('Contact form error:', err);
+            setError(err.message || 'Unable to send message. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleCreateTicket = () => {
@@ -72,14 +95,6 @@ function Contact() {
         } else {
             navigate('/signin');
         }
-    };
-
-    const handleEmailDirect = () => {
-        const subject = encodeURIComponent(formData.subject || 'Contact from Insurance Predictor');
-        const body = encodeURIComponent(
-            `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
-        );
-        window.location.href = `mailto:dmnsir786@gmail.com?subject=${subject}&body=${body}`;
     };
 
     return (
@@ -144,12 +159,12 @@ function Contact() {
                             </div>
                         </div>
 
-                        {/* Quick Actions */}
+                        {/* Quick action for logged-in users */}
                         {isAuthenticated() && (
                             <div className="quick-action-box">
                                 <h3>Need Technical Support?</h3>
                                 <p>Create a support ticket for faster response</p>
-                                <button 
+                                <button
                                     className="quick-action-btn"
                                     onClick={handleCreateTicket}
                                 >
@@ -167,12 +182,16 @@ function Contact() {
                         </p>
 
                         {/* Success Message */}
+                        {/* FIX #9: success now holds the submitted email, not just a boolean */}
                         {success && (
                             <div className="success-message">
                                 <CheckCircle className="success-icon" />
                                 <div>
                                     <strong>Message Received!</strong>
-                                    <p>Thank you for contacting us. We've received your message and will respond to {formData.email || 'your email'} within 24-48 hours.</p>
+                                    <p>
+                                        Thank you for contacting us. We'll respond to{' '}
+                                        <strong>{success}</strong> within 24-48 hours.
+                                    </p>
                                 </div>
                             </div>
                         )}
@@ -198,6 +217,7 @@ function Contact() {
                                     disabled={loading}
                                     required
                                     minLength={3}
+                                    maxLength={100}
                                 />
                             </div>
 
@@ -251,8 +271,8 @@ function Contact() {
                             </div>
 
                             <div className="form-actions">
-                                <button 
-                                    type="submit" 
+                                <button
+                                    type="submit"
                                     className="submit-button"
                                     disabled={loading}
                                 >
@@ -267,16 +287,6 @@ function Contact() {
                                             Send Message
                                         </>
                                     )}
-                                </button>
-                                
-                                <button 
-                                    type="button" 
-                                    className="email-direct-btn"
-                                    onClick={handleEmailDirect}
-                                    disabled={loading}
-                                >
-                                    <Mail className="btn-icon" />
-                                    Email Directly
                                 </button>
                             </div>
                         </form>
