@@ -55,6 +55,9 @@ function SignIn() {
                 storage.setItem("fullName", data.fullName);
                 storage.setItem("isLoggedIn", "true");
 
+                // Trigger header update
+                window.dispatchEvent(new Event('authChange'));
+
                 // Role-based navigation
                 if (data.role === 'admin') {
                     navigate("/admin");
