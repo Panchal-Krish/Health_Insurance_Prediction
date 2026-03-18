@@ -180,7 +180,7 @@ def signup():
             "email": email,
             "password": generate_password_hash(password),
             "role": "user",
-            "created_at": datetime.now(ZoneInfo("Asia/Kolkata"))
+            "created_at": datetime.now()
         })
         
         return jsonify({"message": "Signup successful"}), 201
@@ -274,7 +274,7 @@ def predict_premium():
             "pre_existing_diseases": data["pre_existing_diseases"],
             "annual_income": data["annual_income"],
             "predicted_premium": premium,
-            "last_checked_at": datetime.now(ZoneInfo("Asia/Kolkata"))
+            "last_checked_at": datetime.now()
         }
         
         premium_collection.update_one(
@@ -349,7 +349,7 @@ def create_ticket():
             "assigned_role": None,
             "admin_response": "",
             "manager_response": "",  # ✅ FIXED: Initialize manager_response
-            "created_at": datetime.now(ZoneInfo("Asia/Kolkata"))
+            "created_at": datetime.now()
         }
         
         tickets_collection.insert_one(ticket)
@@ -492,7 +492,7 @@ def create_manager():
             "email": email,
             "password": generate_password_hash(data["password"]),
             "role": "manager",
-            "created_at": datetime.now(ZoneInfo("Asia/Kolkata"))
+            "created_at": datetime.now()
         })
         
         return jsonify({"message": "Manager account created"}), 201

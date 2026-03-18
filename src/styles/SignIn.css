@@ -6,6 +6,7 @@
     padding: 40px 20px;
     background: #0b0b0b;
 }
+
 .signin-box {
     background: #111111;
     padding: 48px 40px;
@@ -19,6 +20,7 @@
 .signin-box:hover {
     border-color: #facc15;
 }
+
 .signin-icon {
     width: 56px;
     height: 56px;
@@ -35,6 +37,7 @@
     height: 28px;
     color: #000;
 }
+
 .signin-title {
     font-size: 28px;
     font-weight: 800;
@@ -49,6 +52,7 @@
     text-align: center;
     margin-bottom: 32px;
 }
+
 .form-group label {
     display: block;
     font-size: 14px;
@@ -56,6 +60,7 @@
     color: #d1d5db;
     margin-bottom: 8px;
 }
+
 .input-wrapper {
     position: relative;
     width: 100%;
@@ -83,6 +88,7 @@
     border-color: #facc15;
     box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.15);
 }
+
 .input-icon {
     position: absolute;
     left: 16px;
@@ -113,6 +119,7 @@
 .toggle-password:hover .eye-icon {
     color: #facc15;
 }
+
 .form-options {
     display: flex;
     justify-content: space-between;
@@ -143,6 +150,7 @@
 .forgot-password:hover {
     color: #fde047;
 }
+
 .signin-button {
     width: 100%;
     background: #facc15;
@@ -165,6 +173,7 @@
     transform: translateY(-2px);
     box-shadow: 0 10px 30px rgba(250, 204, 21, 0.3);
 }
+
 .signup-section {
     margin-top: 32px;
     text-align: center;
@@ -188,6 +197,7 @@
     color: #fde047;
     text-decoration: underline;
 }
+
 @media (max-width: 480px) {
     .signin-box {
         padding: 32px 24px;
@@ -196,7 +206,10 @@
     .signin-title {
         font-size: 24px;
     }
-}/* FORCE FIX FOR ICON OVERLAP – DARK THEME *//* FORCE FIX FOR ICON OVERLAP – CLEAN DARK THEME */
+}
+
+/* FORCE FIX FOR ICON OVERLAP – DARK THEME */
+/* FORCE FIX FOR ICON OVERLAP – CLEAN DARK THEME */
 .signin-container .input-wrapper input {
     padding-left: 52px !important;
     padding-right: 52px !important;
@@ -211,7 +224,59 @@
 
     box-shadow: none !important;
 }
+
 .signin-container .input-wrapper input:focus {
     border-color: #facc15 !important;
     box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.25) !important;
+}
+
+
+/* Error Message */
+.error-message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background-color: #fee;
+    border: 1px solid #fcc;
+    border-radius: 8px;
+    color: #c33;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.error-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+/* Loading Spinner */
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ffffff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Disabled State */
+.signin-button:disabled,
+.signup-link:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+input:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
 }
