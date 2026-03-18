@@ -1,27 +1,80 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AlertCircle, Loader } from "lucide-react";
+import { getToken, fetchWithAuth } from "../utils/auth";
 import "./../styles/Dashboard.css";
+
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 function Dashboard() {
     const navigate = useNavigate();
     const [history, setHistory] = useState(null);
-    const email = localStorage.getItem("userEmail");
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (!localStorage.getItem("isLoggedIn")) {
+        // Get auth values directly from storage (not from getCurrentUser)
+        const storage = localStorage.getItem('token') ? localStorage : sessionStorage;
+        const email = storage.getItem('userEmail');
+        const role = storage.getItem('role');
+        const token = getToken();
+
+        // Check if logged in
+        if (!token || !email) {
             navigate("/signin");
             return;
         }
 
-        fetch(`http://localhost:5000/premium-history/${email}`)
-            .then(res => res.json())
-            .then(data => setHistory(data))
-            .catch(() => setHistory(null));
-    }, [email, navigate]);
+        // Redirect admin/manager to their panels
+        if (role === 'admin') {
+            navigate("/admin");
+            return;
+        }
+        if (role === 'manager') {
+            navigate("/manager");
+            return;
+        }
+
+        // Fetch premium history for regular users
+        fetchPremiumHistory(email);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // ✅ FIX: Empty array - only run once on mount
+
+    const fetchPremiumHistory = async (email) => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const response = await fetchWithAuth(
+                `${API_URL}/premium-history/${email}`
+            );
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch premium history');
+            }
+
+            const data = await response.json();
+            setHistory(data);
+        } catch (err) {
+            console.error('Error fetching history:', err);
+            setError('Unable to load your premium data. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRetry = () => {
+        const storage = localStorage.getItem('token') ? localStorage : sessionStorage;
+        const email = storage.getItem('userEmail');
+        if (email) {
+            fetchPremiumHistory(email);
+        }
+    };
 
     // ---------------- NORMALIZE ----------------
     const normalize = (type, value) => {
-        if (type === "smoker") {
+        if (type === "smoker" || type === "pre_existing") {
             return value ? 100 : 10;
         }
 
@@ -35,6 +88,8 @@ function Dashboard() {
                 return Math.min((num / 40) * 100, 100);
             case "income":
                 return Math.min((num / 1500000) * 100, 100);
+            case "children":
+                return Math.min((num / 5) * 100, 100);
             default:
                 return 0;
         }
@@ -49,14 +104,16 @@ function Dashboard() {
     // ---------------- GAUGE COMPONENT ----------------
     const HalfGauge = ({ label, value, type }) => {
         const percent = normalize(type, value);
-        const circumference = 440;
-        const dashOffset =
-            circumference - (percent / 100) * circumference;
+        // Fixed: Correct circumference for semicircle with radius 80
+        const radius = 80;
+        const circumference = Math.PI * radius; // π * r for semicircle
+        const dashOffset = circumference - (percent / 100) * circumference;
 
         return (
             <div className="gauge-card">
                 <div style={{ position: "relative" }}>
                     <svg viewBox="0 0 200 120" className="gauge-svg">
+                        {/* Background arc */}
                         <path
                             d="M20 100 A80 80 0 0 1 180 100"
                             fill="none"
@@ -64,6 +121,7 @@ function Dashboard() {
                             strokeWidth="16"
                             strokeLinecap="round"
                         />
+                        {/* Foreground arc */}
                         <path
                             d="M20 100 A80 80 0 0 1 180 100"
                             fill="none"
@@ -77,8 +135,8 @@ function Dashboard() {
 
                     <div className="gauge-value">
                         {type === "income"
-                            ? `₹${value}`
-                            : type === "smoker"
+                            ? `₹${value.toLocaleString()}`
+                            : type === "smoker" || type === "pre_existing"
                                 ? value ? "Yes" : "No"
                                 : value}
                     </div>
@@ -89,30 +147,86 @@ function Dashboard() {
         );
     };
 
-    const getPremiumRisk = (premium) => {
-        if (premium < 15000) return { label: "Low", percent: 30 };
-        if (premium < 30000) return { label: "Medium", percent: 65 };
-        return { label: "High", percent: 95 };
+    // ---------------- INFO CARD COMPONENT ----------------
+    const InfoCard = ({ label, value }) => {
+        return (
+            <div className="info-card">
+                <div className="info-label">{label}</div>
+                <div className="info-value">{value}</div>
+            </div>
+        );
     };
 
-    const premiumRisk =
-        history && getPremiumRisk(history.predicted_premium);
+    const getPremiumRisk = (premium) => {
+        if (premium < 15000) return { label: "Low", percent: 30, color: "#22c55e" };
+        if (premium < 30000) return { label: "Medium", percent: 65, color: "#facc15" };
+        return { label: "High", percent: 95, color: "#ef4444" };
+    };
+
+    const premiumRisk = history && getPremiumRisk(history.predicted_premium);
+
+    // ---------------- LOADING STATE ----------------
+    if (loading) {
+        return (
+            <section className="dashboard">
+                <div className="loading-container">
+                    <Loader className="spinner-large" />
+                    <p>Loading your dashboard...</p>
+                </div>
+            </section>
+        );
+    }
+
+    // ---------------- ERROR STATE ----------------
+    if (error) {
+        return (
+            <section className="dashboard">
+                <div className="error-container">
+                    <AlertCircle className="error-icon-large" />
+                    <p>{error}</p>
+                    <button
+                        className="retry-btn"
+                        onClick={handleRetry}
+                    >
+                        Retry
+                    </button>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className="dashboard">
+            <h1 className="dashboard-title">Your Insurance Dashboard</h1>
 
             {/* -------- EMPTY STATE -------- */}
             {!history && (
-                <p style={{ color: "#9ca3af", marginTop: "40px" }}>
-                    No premium predictions yet.
-                </p>
+                <div className="empty-state">
+                    <p>No premium predictions yet.</p>
+                    <p className="empty-subtitle">
+                        Get started by predicting your insurance premium
+                    </p>
+                    <button
+                        className="predict-btn"
+                        onClick={() => navigate("/predict")}
+                    >
+                        Predict Your Premium
+                    </button>
+                </div>
             )}
 
             {/* -------- DASHBOARD CONTENT -------- */}
             {history && (
                 <>
-                    <div className="dashboard-grid">
+                    <div className="dashboard-header">
+                        <h2>Last Prediction</h2>
+                        <p className="timestamp">
+                            Checked on: {new Date(history.last_checked_at).toLocaleString()}
+                        </p>
+                    </div>
 
+                    {/* Main Gauges Grid */}
+                    <div className="dashboard-grid">
                         <div className="top-left">
                             <HalfGauge
                                 label="Age"
@@ -139,51 +253,69 @@ function Dashboard() {
 
                         <div className="bottom-right">
                             <HalfGauge
-                                label="Income"
+                                label="Annual Income"
                                 value={history.annual_income}
                                 type="income"
                             />
                         </div>
 
+                        {/* Center Premium Display */}
                         <div className="center-premium">
+                            <div className="premium-label-top">Predicted Premium</div>
                             <div className="premium-value">
-                                ₹{history.predicted_premium}
+                                ₹{history.predicted_premium.toLocaleString()}
                             </div>
 
                             <div className="premium-bar-container">
                                 <div
                                     className="premium-bar-fill"
                                     style={{
-                                        width: `${premiumRisk.percent}%`
+                                        width: `${premiumRisk.percent}%`,
+                                        backgroundColor: premiumRisk.color
                                     }}
                                 />
                             </div>
 
-                            <div className="premium-label">
-                                Premium: {premiumRisk.label}
+                            <div
+                                className="premium-label"
+                                style={{ color: premiumRisk.color }}
+                            >
+                                Risk: {premiumRisk.label}
                             </div>
                         </div>
                     </div>
 
-                    <div className="timestamp">
-                        Last Checked:{" "}
-                        {new Date(
-                            history.last_checked_at
-                        ).toLocaleString()}
+                    {/* Additional Info Cards */}
+                    <div className="info-cards-grid">
+                        <InfoCard
+                            label="Gender"
+                            value={history.gender.charAt(0).toUpperCase() + history.gender.slice(1)}
+                        />
+                        <InfoCard
+                            label="Region"
+                            value={history.region.charAt(0).toUpperCase() + history.region.slice(1)}
+                        />
+                        <InfoCard
+                            label="Children"
+                            value={history.children}
+                        />
+                        <InfoCard
+                            label="Pre-existing Diseases"
+                            value={history.pre_existing_diseases ? "Yes" : "No"}
+                        />
+                    </div>
+
+                    {/* Action Button */}
+                    <div className="bottom-action">
+                        <button
+                            className="predict-btn"
+                            onClick={() => navigate("/predict")}
+                        >
+                            Predict New Premium
+                        </button>
                     </div>
                 </>
             )}
-
-            {/* -------- BUTTON ALWAYS VISIBLE -------- */}
-            <div className="bottom-action">
-                <button
-                    className="predict-btn"
-                    onClick={() => navigate("/predict")}
-                >
-                    Predict New Premium
-                </button>
-            </div>
-
         </section>
     );
 }
