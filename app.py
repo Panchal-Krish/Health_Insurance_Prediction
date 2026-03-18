@@ -9,6 +9,8 @@ import jwt
 import os
 from functools import wraps
 from dotenv import load_dotenv
+import pickle
+import numpy as np
 
 # Load environment variables
 load_dotenv()
@@ -151,6 +153,92 @@ def calculate_premium(data):
     return int(premium)
 
 # ==============================
+# ML MODEL PREDICTION
+# ==============================
+def predict_premium_ml(age, sex, bmi, children, smoker, region):
+    """
+    ML-based premium prediction
+    
+    Args:
+        age: int (18-100)
+        sex: int (0=female, 1=male)
+        bmi: float (10-60)
+        children: int (0-10)
+        smoker: int (0=no, 1=yes)
+        region: str ('northeast', 'northwest', 'southeast', 'southwest')
+    
+    Returns:
+        float: predicted premium
+    """
+    
+    # One-hot encode region (matching dataset format)
+    region_northwest = 1 if region == 'northwest' else 0
+    region_southeast = 1 if region == 'southeast' else 0
+    region_southwest = 1 if region == 'southwest' else 0
+    # Note: northeast is implicit (all 0s)
+    
+    # ============================================================
+    # TODO: WHEN YOU HAVE THE MODEL FILE, REPLACE THIS SECTION:
+    # ============================================================
+    # import pickle
+    # model = pickle.load(open('insurance_model.pkl', 'rb'))
+    # 
+    # features = [age, sex, bmi, children, smoker, 
+    #             region_northwest, region_southeast, region_southwest]
+    # prediction = model.predict([features])[0]
+    # return round(prediction, 2)
+    # ============================================================
+    
+    # FOR NOW: Realistic formula based on typical insurance pricing
+    base_premium = 3000
+    
+    # Age factor (increases with age)
+    age_premium = age * 250
+    
+    # BMI factor
+    if bmi < 18.5:
+        bmi_premium = 1000  # Underweight risk
+    elif bmi < 25:
+        bmi_premium = 0  # Normal
+    elif bmi < 30:
+        bmi_premium = 1500  # Overweight
+    else:
+        bmi_premium = 3000  # Obese
+    
+    # Children factor
+    children_premium = children * 500
+    
+    # Smoking factor (huge impact)
+    smoker_premium = 20000 if smoker == 1 else 0
+    
+    # Gender factor (small difference)
+    gender_premium = 500 if sex == 1 else 0
+    
+    # Region factor
+    region_premiums = {
+        'northeast': 0,
+        'northwest': 500,
+        'southeast': 1000,
+        'southwest': 1500
+    }
+    region_premium = region_premiums.get(region, 0)
+    
+    total_premium = (
+        base_premium + 
+        age_premium + 
+        bmi_premium + 
+        children_premium + 
+        smoker_premium + 
+        gender_premium + 
+        region_premium
+    )
+    
+    return round(total_premium, 2)
+
+
+
+
+# ==============================
 # SIGNUP
 # ==============================
 @app.route("/signup", methods=["POST"])
@@ -229,7 +317,7 @@ def login():
         return jsonify({"message": "Server error during login"}), 500
 
 # ==============================
-# PREDICT PREMIUM
+# PREDICT PREMIUM (ML-POWERED)
 # ==============================
 @app.route("/predict-premium", methods=["POST"])
 @token_required
@@ -238,41 +326,56 @@ def predict_premium():
         data = request.json
         
         # Validate required fields
-        required_fields = ["age", "gender", "bmi", "children", "smoker", 
-                          "region", "pre_existing_diseases", "annual_income"]
+        required_fields = ["age", "sex", "bmi", "children", "smoker", "region"]
         
         if not all(k in data for k in required_fields):
             return jsonify({"message": "Missing required fields"}), 400
         
         # Validate data ranges
-        if not (0 < data["age"] < 120):
-            return jsonify({"message": "Invalid age"}), 400
+        age = data["age"]
+        if not (18 <= age <= 100):
+            return jsonify({"message": "Age must be between 18 and 100"}), 400
         
-        if not (10 < data["bmi"] < 60):
-            return jsonify({"message": "Invalid BMI"}), 400
+        bmi = data["bmi"]
+        if not (10 <= bmi <= 60):
+            return jsonify({"message": "BMI must be between 10 and 60"}), 400
         
-        if data["children"] < 0:
+        children = data["children"]
+        if not (0 <= children <= 10):
             return jsonify({"message": "Invalid number of children"}), 400
         
-        if data["annual_income"] < 0:
-            return jsonify({"message": "Invalid income"}), 400
+        smoker = data["smoker"]
+        if smoker not in [0, 1]:
+            return jsonify({"message": "Smoker must be 0 or 1"}), 400
         
-        # Calculate premium
-        premium = calculate_premium(data)
+        region = data["region"]
+        valid_regions = ['northeast', 'northwest', 'southeast', 'southwest']
+        if region not in valid_regions:
+            return jsonify({"message": f"Region must be one of: {valid_regions}"}), 400
+        
+        # Get ML prediction
+        premium = predict_premium_ml(
+            age=age,
+            sex=data["sex"],
+            bmi=bmi,
+            children=children,
+            smoker=smoker,
+            region=region
+        )
         
         # Get user email from token
         user_email = request.current_user.get('email')
         
-        # Store prediction
+        # Store prediction in database
         record = {
-            "age": data["age"],
-            "gender": data["gender"],
-            "bmi": data["bmi"],
-            "children": data["children"],
-            "smoker": data["smoker"],
-            "region": data["region"],
-            "pre_existing_diseases": data["pre_existing_diseases"],
-            "annual_income": data["annual_income"],
+            "age": age,
+            "gender": "male" if data["sex"] == 1 else "female",
+            "bmi": bmi,
+            "children": children,
+            "smoker": smoker == 1,
+            "region": region,
+            "pre_existing_diseases": False,  # Not used in ML model
+            "annual_income": 0,  # Not used in ML model
             "predicted_premium": premium,
             "last_checked_at": datetime.now()
         }
