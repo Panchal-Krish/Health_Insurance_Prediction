@@ -82,15 +82,20 @@ function Dashboard() {
     useEffect(() => {
         if (!isLoggedIn) return;
         fetchPremiumHistory();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [isLoggedIn]);
 
     const fetchPremiumHistory = async () => {
         setLoading(true);
         setError(null);
         try {
             const response = await fetchWithAuth(`${API_URL}/premium-history`);
-            if (!response.ok) throw new Error('Failed to fetch premium history');
+
+            if (!response) return; // ✅ handle redirect case
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch premium history');
+            }
+
             setHistory(await response.json());
         } catch (err) {
             console.error('Error fetching history:', err);
@@ -123,7 +128,9 @@ function Dashboard() {
         );
     }
 
-    const premiumRisk = history && getPremiumRisk(history.predicted_premium);
+    const premiumRisk = history?.predicted_premium
+        ? getPremiumRisk(history.predicted_premium)
+        : { percent: 0, color: '#ccc', label: 'N/A' };
 
     return (
         <section className="dashboard">

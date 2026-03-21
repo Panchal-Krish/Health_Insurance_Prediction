@@ -134,7 +134,7 @@ function Contact() {
                                 </div>
                                 <div className="contact-detail-text">
                                     <h3>Email Us</h3>
-                                    <a href="mailto:dmnsir786@gmail.com">dmnsir786@gmail.com</a>
+                                    <a href="mailto:g16ibmproject@gmail.com">g16ibmproject@gmail.com</a>
                                 </div>
                             </div>
 

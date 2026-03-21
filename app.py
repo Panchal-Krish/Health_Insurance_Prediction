@@ -111,6 +111,10 @@ def predict_premium_ml(age, sex, bmi, children, smoker, region):
             'age_sq':           int(age ** 2)
         }])
 
+        # ✅ Ensure correct feature order (SAFE FIX)
+        if hasattr(ml_model, "feature_names_in_"):
+            features = features[ml_model.feature_names_in_]
+
         log_pred = ml_model.predict(features)[0]
         return round(float(np.expm1(log_pred)), 2)
 
@@ -263,27 +267,32 @@ def predict_premium():
         if not all(k in data for k in ["age", "sex", "bmi", "children", "smoker", "region"]):
             return jsonify({"message": "Missing required fields"}), 400
 
-        age = data["age"]
+# ✅ SAFE TYPE CASTING (FIX)
+        try:
+            age = int(data["age"])
+            bmi = float(data["bmi"])
+            children = int(data["children"])
+            smoker = int(data["smoker"])
+            sex = int(data["sex"])
+            region = str(data["region"])
+        except (ValueError, TypeError):
+            return jsonify({"message": "Invalid input format"}), 400
+        
         if not isinstance(age, int) or not (18 <= age <= 100):
             return jsonify({"message": "Age must be an integer between 18 and 100"}), 400
 
-        bmi = data["bmi"]
         if not isinstance(bmi, (int, float)) or not (10 <= bmi <= 60):
             return jsonify({"message": "BMI must be a number between 10 and 60"}), 400
 
-        children = data["children"]
         if not isinstance(children, int) or not (0 <= children <= 10):
             return jsonify({"message": "Children must be an integer between 0 and 10"}), 400
 
-        smoker = data["smoker"]
         if smoker not in [0, 1]:
             return jsonify({"message": "Smoker must be 0 or 1"}), 400
 
-        sex = data["sex"]
         if sex not in [0, 1]:
             return jsonify({"message": "Sex must be 0 (female) or 1 (male)"}), 400
 
-        region = data["region"]
         if region not in ['northeast', 'northwest', 'southeast', 'southwest']:
             return jsonify({"message": "Invalid region"}), 400
 

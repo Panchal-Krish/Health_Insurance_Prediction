@@ -39,18 +39,16 @@ function ManagerDashboard() {
   // FIX: Escape key closes modal
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape') closeResponseModal();
+      if (e.key === 'Escape' && showResponseModal) closeResponseModal();
     };
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, []);
 
   useEffect(() => {
-    // RoleBasedRoute already blocks non-managers — no duplicate check needed
     if (!isLoggedIn) return;
     fetchTickets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isLoggedIn]);
 
   const fetchTickets = async () => {
     setLoading(true);
@@ -58,6 +56,7 @@ function ManagerDashboard() {
     try {
       // FIX: No email in URL — backend reads it from JWT token
       const response = await fetchWithAuth(`${API_URL}/manager/my-tickets`);
+      if (!response) return;
       if (!response.ok) throw new Error('Failed to fetch tickets');
       setTickets(await response.json());
     } catch (err) {
@@ -95,6 +94,7 @@ function ManagerDashboard() {
           body: JSON.stringify({ status: selectedStatus, manager_response: managerResponse.trim() })
         }
       );
+      if (!response) return;
       if (!response.ok) throw new Error('Failed to update ticket');
 
       showSuccess('Ticket updated successfully');

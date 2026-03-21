@@ -22,14 +22,6 @@ function Predict() {
     const [error, setError] = useState("");
     const [result, setResult] = useState(null);
 
-    useEffect(() => {
-        // Check authentication
-        const token = getToken();
-        if (!token) {
-            navigate("/signin");
-        }
-    }, [navigate]);
-
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setForm({
@@ -66,6 +58,7 @@ function Predict() {
     };
 
     const handleSubmit = async (e) => {
+        if (loading) return;
         e.preventDefault();
 
         // Validate form
@@ -149,7 +142,7 @@ function Predict() {
                     <div className="result-container">
                         <CheckCircle className="success-icon-large" />
                         <h2 className="result-title">Your Predicted Premium</h2>
-                        <div className="result-amount">₹{result.toLocaleString()}</div>
+                        <div className="result-amount">${result.toLocaleString()}</div>
                         <p className="result-subtitle">
                             This is an AI-powered estimate based on your information
                         </p>

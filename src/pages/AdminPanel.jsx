@@ -54,8 +54,8 @@ function AdminPanel() {
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape") {
-        closeResponseModal();
-        setShowManagerModal(false);
+        if (showResponseModal) closeResponseModal();
+        if (showManagerModal) setShowManagerModal(false);
       }
     };
     window.addEventListener("keydown", handleEscape);
@@ -67,7 +67,10 @@ function AdminPanel() {
     setError(null);
     try {
       const response = await fetchWithAuth(`${API_URL}/admin/all-tickets`);
-      if (!response.ok) throw new Error("Failed to fetch tickets");
+      if (!response) return;
+      if (!response.ok) {
+        throw new Error("Failed to fetch tickets");
+      }
       setTickets(await response.json());
     } catch (err) {
       console.error("Error fetching tickets:", err);
@@ -81,6 +84,7 @@ function AdminPanel() {
   const fetchManagers = useCallback(async () => {
     try {
       const response = await fetchWithAuth(`${API_URL}/admin/managers`);
+      if (!response) return;
       if (!response.ok) throw new Error("Failed to fetch managers");
       setManagers(await response.json());
       // Removed tickets.forEach — select handles missing keys with || "" already
@@ -91,23 +95,16 @@ function AdminPanel() {
   }, []);
 
   useEffect(() => {
-    const token = getToken();
-    const user = getCurrentUser();
-
-    if (!token || user.role !== "admin") {
-      navigate("/signin");
-      return;
-    }
-
     fetchTickets();
     fetchManagers();
     fetchMessages();
-  }, [navigate, fetchManagers]);
+  }, [fetchManagers]);
 
   // Option 4: fetch contact messages
   const fetchMessages = async () => {
     try {
       const response = await fetchWithAuth(`${API_URL}/admin/contacts`);
+      if (!response) return;
       if (!response.ok) throw new Error("Failed to fetch messages");
       setMessages(await response.json());
     } catch (err) {
@@ -129,6 +126,7 @@ function AdminPanel() {
         method: "POST",
         body: JSON.stringify({ ticket_id, assigned_to: managerEmail, assigned_role: "manager" })
       });
+      if (!response) return;
       if (!response.ok) throw new Error("Failed to assign ticket");
 
       showSuccess("Ticket assigned successfully");
@@ -172,6 +170,7 @@ function AdminPanel() {
         `${API_URL}/admin/update-ticket/${currentTicket.ticket_id}`,
         { method: "PUT", body: JSON.stringify({ status: selectedStatus, admin_response: adminResponse.trim() }) }
       );
+      if (!response) return;
       if (!response.ok) throw new Error("Failed to update ticket");
 
       showSuccess("Ticket updated successfully");
@@ -209,6 +208,7 @@ function AdminPanel() {
           password: newManager.password
         })
       });
+      if (!response) return;
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to create manager");
@@ -233,6 +233,7 @@ function AdminPanel() {
         `${API_URL}/admin/contacts/${messageId}/read`,
         { method: "PUT" }
       );
+      if (!response) return;
       if (!response.ok) throw new Error("Failed to mark as read");
       setMessages(prev =>
         prev.map(m => m._id === messageId ? { ...m, status: "read" } : m)

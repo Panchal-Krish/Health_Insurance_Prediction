@@ -61,7 +61,7 @@ function Footer() {
                             <li>
                                 <Mail className="contact-icon" />
                                 <a href="mailto:g16ibmproject@gmail.com" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                                    dmnsir786@gmail.com
+                                    g16ibmproject@gmail.com
                                 </a>
                             </li>
                             <li>
