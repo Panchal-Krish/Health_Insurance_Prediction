@@ -121,77 +121,36 @@ function Predict() {
         });
     };
 
-    return (
-        <div className="predict-page">
-            <div className="predict-container">
-                <h1 className="predict-title">Premium Calculator</h1>
-                <p className="predict-subtitle">
-                    Get an instant estimate of your insurance premium
-                </p>
+        return (
+        <div className="pp-page">
+                <div className="pp-card">
 
-                {/* Error Message */}
-                {error && (
-                    <div className="error-message">
-                        <AlertCircle className="error-icon" />
-                        <span>{error}</span>
-                    </div>
-                )}
+                    <h1 className="pp-title">Premium Calculator</h1>
+                    <p className="pp-subtitle">
+                        Get an instant estimate of your insurance premium
+                    </p>
 
-                {/* Success Result */}
-                {result && (
-                    <div className="result-container">
-                        <CheckCircle className="success-icon-large" />
-                        <h2 className="result-title">Your Predicted Premium</h2>
-                        <div className="result-amount">${result.toLocaleString()}</div>
-                        <p className="result-subtitle">
-                            This is an AI-powered estimate based on your information
-                        </p>
-                        <div className="result-actions">
-                            <button
-                                className="primary-btn"
-                                onClick={handleGoToDashboard}
-                            >
-                                View Dashboard
-                            </button>
-                            <button
-                                className="secondary-btn"
-                                onClick={handlePredictAgain}
-                            >
-                                Calculate Again
-                            </button>
-                        </div>
-                    </div>
-                )}
+                    <form className="pp-form" onSubmit={handleSubmit}>
 
-                {/* Prediction Form */}
-                {!result && (
-                    <form className="predict-form" onSubmit={handleSubmit}>
                         {/* Age */}
-                        <div className="form-group">
-                            <label htmlFor="age">Age</label>
+                        <div className="pp-group">
+                            <label>Age</label>
                             <input
                                 type="number"
-                                id="age"
                                 name="age"
                                 placeholder="Enter your age (18-100)"
                                 value={form.age}
                                 onChange={handleChange}
-                                disabled={loading}
-                                min="18"
-                                max="100"
-                                required
                             />
                         </div>
 
                         {/* Gender */}
-                        <div className="form-group">
-                            <label htmlFor="gender">Gender</label>
+                        <div className="pp-group">
+                            <label>Gender</label>
                             <select
-                                id="gender"
                                 name="gender"
                                 value={form.gender}
                                 onChange={handleChange}
-                                disabled={loading}
                             >
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
@@ -199,51 +158,38 @@ function Predict() {
                         </div>
 
                         {/* BMI */}
-                        <div className="form-group">
-                            <label htmlFor="bmi">BMI (Body Mass Index)</label>
+                        <div className="pp-group">
+                            <label>BMI (Body Mass Index)</label>
                             <input
                                 type="number"
-                                id="bmi"
                                 name="bmi"
-                                step="0.1"
                                 placeholder="e.g., 24.5"
                                 value={form.bmi}
                                 onChange={handleChange}
-                                disabled={loading}
-                                min="10"
-                                max="60"
-                                required
                             />
-                            <small className="form-hint">
+                            <small className="pp-hint">
                                 Normal range: 18.5 - 24.9
                             </small>
                         </div>
 
                         {/* Children */}
-                        <div className="form-group">
-                            <label htmlFor="children">Number of Children</label>
+                        <div className="pp-group">
+                            <label>Number of Children</label>
                             <input
                                 type="number"
-                                id="children"
                                 name="children"
-                                placeholder="0"
                                 value={form.children}
                                 onChange={handleChange}
-                                disabled={loading}
-                                min="0"
-                                max="10"
                             />
                         </div>
 
-                        {/* Region - ✅ FIXED: Added dropdown */}
-                        <div className="form-group">
-                            <label htmlFor="region">Region</label>
+                        {/* Region */}
+                        <div className="pp-group">
+                            <label>Region</label>
                             <select
-                                id="region"
                                 name="region"
                                 value={form.region}
                                 onChange={handleChange}
-                                disabled={loading}
                             >
                                 <option value="northeast">Northeast</option>
                                 <option value="northwest">Northwest</option>
@@ -253,39 +199,28 @@ function Predict() {
                         </div>
 
                         {/* Smoker */}
-                        <div className="form-group checkbox-group">
-                            <label className="checkbox-label">
+                        <div className="pp-checkbox">
+                            <label>
                                 <input
                                     type="checkbox"
                                     name="smoker"
                                     checked={form.smoker}
                                     onChange={handleChange}
-                                    disabled={loading}
                                 />
-                                <span>I am a smoker</span>
+                                I am a smoker
                             </label>
                         </div>
 
-                        {/* Submit Button */}
-                        <button
-                            type="submit"
-                            className="submit-btn"
-                            disabled={loading}
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader className="spinner" />
-                                    Calculating...
-                                </>
-                            ) : (
-                                "Calculate Premium"
-                            )}
+                        {/* Button */}
+                        <button type="submit" className="pp-btn">
+                            Calculate Premium
                         </button>
+
                     </form>
-                )}
+                </div>
             </div>
-        </div>
-    );
-}
+        );
+    }
+
 
 export default Predict;

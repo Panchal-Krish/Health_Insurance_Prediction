@@ -1,17 +1,32 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Mail, Phone, MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import "./../styles/Footer.css";
 import footerLogo from "../assets/footer.png";
-
+import { useAuth } from '../context/AuthContext';
 
 function Footer() {
+    const { role } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const isAdminOrManager = role === 'admin' || role === 'manager';
+
+    // Scroll to top whenever route changes
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [location.pathname]);
+
     const handleMouseEnter = (e) => {
         e.target.style.color = "#387ed1";
     };
 
     const handleMouseLeave = (e) => {
         e.target.style.color = "#6b7280";
+    };
+
+    const handleContactClick = () => {
+        navigate('/contact');
     };
 
     return (
@@ -23,7 +38,6 @@ function Footer() {
                         <div className="footer-logo">
                             <img src={footerLogo} alt="Prognos AI Logo" className="footer-logo-image" />
                         </div>
-
                         <p className="footer-description">
                             Stay ahead of your health Insurance: Predict, Prepare
                         </p>
@@ -32,27 +46,34 @@ function Footer() {
                         </p>
                     </div>
 
-                    {/* Quick Links Section */}
-                    <div className="footer-section">
-                        <h3 className="footer-heading">Quick Links</h3>
-                        <ul className="footer-links">
-                            <li>
-                                <Link to="/how-it-works" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                                    How it Works
-                                </Link>
-                            </li>
-                            <li>
-                                <Link to="/about" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                                    About Us
-                                </Link>
-                            </li>
-                            <li>
-                                <Link to="/contact" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                                    Contact
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
+                    {/* Quick Links Section - hidden for admin/manager */}
+                    {!isAdminOrManager && (
+                        <div className="footer-section">
+                            <h3 className="footer-heading">Quick Links</h3>
+                            <ul className="footer-links">
+                                <li>
+                                    <Link to="/how-it-works" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                                        How it Works
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link to="/about" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                                        About Us
+                                    </Link>
+                                </li>
+                                <li>
+                                    <button
+                                        onClick={handleContactClick}
+                                        onMouseEnter={handleMouseEnter}
+                                        onMouseLeave={handleMouseLeave}
+                                        className="footer-link-btn"
+                                    >
+                                        Contact
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    )}
 
                     {/* Contact Us Section */}
                     <div className="footer-section">
@@ -107,16 +128,16 @@ function Footer() {
                         </div>
                     </div>
                 </div>
-                    <div className="footer-legal">
-                        <Link to="/privacy-policy" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                            Privacy Policy
-                        </Link>
-                        <Link to="/terms-of-service" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                            Terms of Service
-                        </Link>
-                    </div>
+
+                <div className="footer-legal">
+                    <Link to="/privacy-policy" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                        Privacy Policy
+                    </Link>
+                    <Link to="/terms-of-service" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                        Terms of Service
+                    </Link>
                 </div>
-            
+            </div>
         </footer>
     );
 }

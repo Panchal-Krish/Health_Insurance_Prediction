@@ -205,7 +205,7 @@ function Contact() {
                         )}
 
                         <form onSubmit={handleSubmit} className="contact-form">
-                            <div className="form-group">
+                            <div className="form-groupcontact">
                                 <label htmlFor="name">Full Name *</label>
                                 <input
                                     type="text"
@@ -221,7 +221,7 @@ function Contact() {
                                 />
                             </div>
 
-                            <div className="form-group">
+                            <div className="form-groupcontact">
                                 <label htmlFor="email">Email Address *</label>
                                 <input
                                     type="email"
@@ -235,7 +235,7 @@ function Contact() {
                                 />
                             </div>
 
-                            <div className="form-group">
+                            <div className="form-groupcontact">
                                 <label htmlFor="subject">Subject *</label>
                                 <input
                                     type="text"
@@ -251,7 +251,7 @@ function Contact() {
                                 />
                             </div>
 
-                            <div className="form-group">
+                            <div className="form-groupcontact">
                                 <label htmlFor="message">Message *</label>
                                 <textarea
                                     id="message"

@@ -161,13 +161,13 @@
 
 /* ================= FORM FIELDS ================= */
 
-.form-group {
+.form-groupcontact {
     display: flex;
     flex-direction: column;
     margin-bottom: 20px;
 }
 
-.form-group label {
+.form-groupcontact label {
     font-size: 14px;
     font-weight: 500;
     color: #d1d5db;
@@ -313,19 +313,24 @@
 .quick-action-box {
     margin-top: 30px;
     padding: 20px;
-    background: #1e3a5f;
-    border: 1px solid #3b82f6;
+    background: #0b0b0b;
+    border: 1px solid #1f1f1f;
     border-radius: 12px;
+     transition: all 0.3s ease;
+}
+.quick-action-box:hover {
+    transform: translateY(-2px);
+    border-color: #facc15;
 }
 
 .quick-action-box h3 {
-    color: #fff;
+    color: #facc15;
     font-size: 18px;
     margin: 0 0 8px 0;
 }
 
 .quick-action-box p {
-    color: #93c5fd;
+    color: #fff;
     font-size: 14px;
     margin: 0 0 15px 0;
 }
@@ -333,18 +338,21 @@
 .quick-action-btn {
     width: 100%;
     padding: 12px;
-    background-color: #3b82f6;
-    color: white;
+    background-color: #facc15;
+    color: rgb(0, 0, 0);
     border: none;
     border-radius: 8px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.3s ease;
 }
 
 .quick-action-btn:hover {
-    background-color: #2563eb;
+    border-color: #facc15;
+    background-color: #facc15;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(250, 204, 21, 0.3);
 }
 
 /* Form Actions */
@@ -372,12 +380,12 @@
 }
 
 .submit-button {
-    background-color: #3b82f6;
-    color: white;
+    background-color: #facc15;
+    color: black;
 }
 
 .submit-button:hover:not(:disabled) {
-    background-color: #2563eb;
+    background-color: #facc15;
 }
 
 .email-direct-btn {

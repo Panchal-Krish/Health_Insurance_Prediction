@@ -44,19 +44,26 @@ function Header() {
       </button>
 
       {/* Navigation */}
+      {/* Navigation */}
       <nav className={`nav ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-        <NavLink to="/" end className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
-          Home
-        </NavLink>
-
-        <NavLink to="/contact" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
-          Contact
-        </NavLink>
-
-        {isLoggedIn && (
-          <NavLink to="/helpdesk" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
-            Help Desk
-          </NavLink>
+        {role !== 'admin' && role !== 'manager' && (
+          <>
+            <NavLink to="/" end className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
+              Home
+            </NavLink>
+        
+            {!isLoggedIn && (
+              <NavLink to="/contact" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
+                Contact
+              </NavLink>
+            )}
+      
+            {isLoggedIn && (
+              <NavLink to="/helpdesk" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
+                Help Desk
+              </NavLink>
+            )}
+          </>
         )}
       </nav>
 

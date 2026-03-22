@@ -1,3 +1,9 @@
+.dashboard {
+    min-height: 100vh;
+    background-color: #121212;
+    padding: 40px 20px;
+}
+
 .dashboard-grid {
     position: relative;
     width: 100%;
@@ -163,11 +169,11 @@
 .spinner-large {
     width: 48px;
     height: 48px;
-    animation: spin 1s linear infinite;
+    animation: dashboard-spin 1s linear infinite;
     margin-bottom: 16px;
 }
 
-@keyframes spin {
+@keyframes dashboard-spin {
     to {
         transform: rotate(360deg);
     }
@@ -192,13 +198,14 @@
 .retry-btn {
     margin-top: 20px;
     padding: 10px 24px;
-    background-color: #3b82f6;
-    color: white;
+    background-color: #facc15;
+    color: #000;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
-    transition: background-color 0.2s;
+    font-weight: 700;
+    transition: all 0.2s;
 }
 
 .retry-btn:hover {

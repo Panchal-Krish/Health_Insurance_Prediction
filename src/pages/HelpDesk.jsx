@@ -166,7 +166,7 @@ function HelpDesk() {
         <h3>Create Support Ticket</h3>
         <form onSubmit={submitTicket}>
           <div className="form-row">
-            <div className="form-group">
+            <div className="form-grouphelp">
               <label>Subject *</label>
               <input
                 name="subject"
@@ -178,7 +178,7 @@ function HelpDesk() {
                 maxLength={100}
               />
             </div>
-            <div className="form-group">
+            <div className="form-grouphelp">
               <label>Priority *</label>
               <select name="priority" value={form.priority} onChange={handleChange} disabled={submitting}>
                 <option value="Low">Low</option>
@@ -188,7 +188,7 @@ function HelpDesk() {
             </div>
           </div>
 
-          <div className="form-group">
+          <div className="form-grouphelp">
             <label>Description *</label>
             <textarea
               name="description"
@@ -204,11 +204,11 @@ function HelpDesk() {
           </div>
 
           <div className="form-row">
-            <div className="form-group">
+            <div className="form-grouphelp">
               <label>Category *</label>
               <select name="category" value={form.category} onChange={handleChange} disabled={submitting}>
-                <option value="Model Issue">Model Issue</option>
-                <option value="Prediction Error">Prediction Error</option>
+                <option value="Model Issue" classname="dropdown">Model Issue</option>
+                <option value="Prediction Error" >Prediction Error</option>
                 <option value="Technical Problem">Technical Problem</option>
                 <option value="Account Problem">Account Problem</option>
                 <option value="Other">Other</option>
@@ -239,7 +239,7 @@ function HelpDesk() {
                     <div className="ticket-id"><TicketIcon size={16} />{ticket.ticket_id}</div>
                     <div className="ticket-subject">{ticket.subject}</div>
                   </div>
-                  <span className="status-badge" style={{ backgroundColor: getStatusColor(ticket.status) }}>
+                  <span className="status-badge1" style={{ backgroundColor: getStatusColor(ticket.status) }}>
                     {ticket.status}
                   </span>
                 </div>

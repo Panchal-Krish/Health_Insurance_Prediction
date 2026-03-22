@@ -22,7 +22,7 @@
 .header-icon {
   width: 48px;
   height: 48px;
-  color: #10b981;
+  color: #facc15;
 }
 
 .manager-header h1 {
@@ -139,8 +139,8 @@
 }
 
 .stat-card {
-  background: #1f2937;
-  border: 1px solid #374151;
+  background: #171717;
+  border: 1px solid #272727;
   border-radius: 12px;
   padding: 20px;
   display: flex;
@@ -157,7 +157,7 @@
 .stat-icon {
   width: 40px;
   height: 40px;
-  color: #3b82f6;
+  color: #facc15;
   flex-shrink: 0;
 }
 
@@ -212,7 +212,7 @@
 
 .filter-select {
   padding: 8px 12px;
-  background-color: #374151;
+  background-color: #000000;
   border: 1px solid #4b5563;
   border-radius: 6px;
   color: #fff;
@@ -222,7 +222,7 @@
 
 .filter-select:focus {
   outline: none;
-  border-color: #10b981;
+  border-color: #facc15;
 }
 
 /* Empty State */
@@ -262,7 +262,7 @@
 /* Table Container */
 .table-container {
   background: #1f2937;
-  border: 1px solid #374151;
+  border: 1px solid #373737;
   border-radius: 12px;
   overflow: hidden;
 }
@@ -274,7 +274,7 @@
 }
 
 .ticket-table thead {
-  background: #111827;
+  background: #171717;
 }
 
 .ticket-table th {
@@ -288,12 +288,15 @@
 }
 
 .ticket-table tbody tr {
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid #373737;
   transition: background-color 0.2s;
 }
 
+.ticket-table {
+  background: #272727;
+}
 .ticket-table tbody tr:hover {
-  background-color: #111827;
+  background-color: #171717;
 }
 
 .ticket-table tbody tr:last-child {
@@ -439,22 +442,22 @@
 }
 
 .primary-btn {
-  background-color: #10b981;
-  color: white;
+  background-color: #facc15;
+  color: black;
 }
 
 .primary-btn:hover:not(:disabled) {
-  background-color: #059669;
+  background-color: #facc15;
 }
 
 .secondary-btn {
   background-color: transparent;
-  color: #9ca3af;
-  border: 1px solid #374151;
+  color: #f9fbff;
+  border: 1px solid #272727;
 }
 
 .secondary-btn:hover:not(:disabled) {
-  background-color: #374151;
+  background-color: #272727;
 }
 
 .primary-btn:disabled,
@@ -479,8 +482,8 @@
 }
 
 .modal-content {
-  background: #1f2937;
-  border: 1px solid #374151;
+  background: #171717;
+  border: 1px solid #272727;
   border-radius: 12px;
   width: 100%;
   max-width: 700px;
@@ -493,13 +496,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid #272727;
 }
 
 .modal-header h3 {
   font-size: 20px;
   font-weight: 600;
-  color: #fff;
+  color: #facc15;
   margin: 0;
 }
 
@@ -513,7 +516,7 @@
 
 .form-group label {
   display: block;
-  color: #fff;
+  color: #facc15;
   font-size: 14px;
   font-weight: 500;
   margin-bottom: 8px;
@@ -523,8 +526,8 @@
 .form-group textarea {
   width: 100%;
   padding: 10px 14px;
-  background-color: #111827;
-  border: 1px solid #374151;
+  background-color: #171717;
+  border: 1px solid #272727;
   border-radius: 8px;
   color: #fff;
   font-size: 14px;
@@ -535,7 +538,7 @@
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #10b981;
+  border-color: #facc15;
 }
 
 .form-group select:disabled,
@@ -559,19 +562,19 @@
 
 .ticket-info-box {
   padding: 16px 24px;
-  background: #111827;
-  border-bottom: 1px solid #374151;
+  background: #171717;
+  border-bottom: 1px solid #272727;
   font-size: 14px;
   line-height: 1.8;
 }
 
 .ticket-info-box p {
   margin: 8px 0;
-  color: #d1d5db;
+  color: #c7c8c8;
 }
 
 .ticket-info-box strong {
-  color: #fff;
+  color: #fdfdfd;
 }
 
 .ticket-description {
@@ -592,7 +595,7 @@
   justify-content: flex-end;
   gap: 10px;
   padding: 20px 24px;
-  border-top: 1px solid #374151;
+  border-top: 1px solid #272727;
   margin-top: 0;
 }
 
