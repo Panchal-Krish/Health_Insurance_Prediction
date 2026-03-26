@@ -258,11 +258,11 @@
 }
 
 .info-card {
-    background: #1f2937;
+    background: #1f1f1f;
     border-radius: 12px;
     padding: 20px;
     text-align: center;
-    border: 1px solid #374151;
+    border: 1px solid #2f2f2f;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -273,7 +273,7 @@
 
 .info-label {
     font-size: 14px;
-    color: #9ca3af;
+    color: #facc15;
     margin-bottom: 8px;
 }
 

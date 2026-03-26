@@ -404,12 +404,12 @@
 }
 
 .action-btn.start {
-  background-color: #8b5cf6;
-  color: white;
+  background-color: #fac115;
+  color: black;
 }
 
 .action-btn.start:hover:not(:disabled) {
-  background-color: #7c3aed;
+  background-color: #d4ae13;
 }
 
 .action-btn.resolve {
@@ -583,11 +583,11 @@
 }
 
 .admin-note {
-  background: #1e3a5f;
+  background: #1f1f1f;
   padding: 10px;
   border-radius: 6px;
   margin-top: 5px;
-  border-left: 3px solid #3b82f6;
+  border-left: 3px solid #fac115;
 }
 
 .modal-actions {

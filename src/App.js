@@ -14,6 +14,9 @@ import Predict from './pages/Predict';
 import HelpDesk from './pages/HelpDesk';
 import AdminPanel from './pages/AdminPanel';
 import ManagerDashboard from './pages/ManagerDashboard';
+import About from './pages/About';
+import HowitWorks from './pages/Howitworks';
+
 
 import './styles/App.css';
 
@@ -69,6 +72,18 @@ function App() {
                 <ProtectedRoute>
                   <HelpDesk />
                 </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/about"
+              element={
+                  <About />
+              }
+            />
+            <Route
+              path="/howitworks"
+              element={
+                  <HowitWorks />
               }
             />
 

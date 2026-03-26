@@ -52,7 +52,7 @@ function Footer() {
                             <h3 className="footer-heading">Quick Links</h3>
                             <ul className="footer-links">
                                 <li>
-                                    <Link to="/how-it-works" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                                    <Link to="/HowitWorks" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                                         How it Works
                                     </Link>
                                 </li>

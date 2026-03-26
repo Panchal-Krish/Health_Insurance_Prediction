@@ -8,23 +8,41 @@ import './../styles/Dashboard.css';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // ── Helpers & sub-components outside the main component ──────────────────────
-
 const normalize = (type, value) => {
     const num = Number(value);
     if (isNaN(num)) return 0;
     switch (type) {
-        case 'age': return Math.min((num / 80) * 100, 100);
-        case 'bmi': return Math.min((num / 40) * 100, 100);
-        case 'children': return Math.min((num / 5) * 100, 100);
-        case 'smoker': return value ? 100 : 10;
+        case 'age':
+            // Age 18-80+, meaningful impact starts at 18
+            return Math.min(((num - 18) / (80 - 18)) * 100, 100);
+        
+        case 'bmi':
+            // BMI: normal is 18.5-24.9, obese is 30+, morbidly obese 40+
+            if (num <= 18.5) return 10;           // underweight - low
+            if (num <= 24.9) return 25;           // normal - low-medium
+            if (num <= 29.9) return 55;           // overweight - medium
+            if (num <= 34.9) return 75;           // obese class 1 - high
+            if (num <= 39.9) return 88;           // obese class 2 - very high
+            return 100;                           // morbidly obese - max
+        
+        case 'children':
+            // 0 children = 0, each child adds impact, max at 5+
+            if (num === 0) return 0;
+            return Math.min((num / 5) * 100, 100);
+        
+        case 'smoker':
+            // Smoker = full red, non-smoker = completely empty
+            return value ? 100 : 0;
+        
         default: return 0;
     }
 };
 
 const getColor = (percent) => {
-    if (percent < 40) return '#22c55e';
-    if (percent < 70) return '#facc15';
-    return '#ef4444';
+    if (percent === 0) return 'transparent';   // completely empty
+    if (percent < 35) return '#22c55e';        // green - low risk
+    if (percent < 65) return '#facc15';        // yellow - medium risk
+    return '#ef4444';                          // red - high risk
 };
 
 const HalfGauge = ({ label, value, type }) => {
@@ -203,14 +221,7 @@ function Dashboard() {
                             label="Region"
                             value={history.region.charAt(0).toUpperCase() + history.region.slice(1)}
                         />
-                        <InfoCard
-                            label="Children"
-                            value={history.children}
-                        />
-                        <InfoCard
-                            label="Smoker"
-                            value={history.smoker ? 'Yes' : 'No'}
-                        />
+                        
                     </div>
 
                     <div className="bottom-action">

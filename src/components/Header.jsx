@@ -63,6 +63,14 @@ function Header() {
                 Help Desk
               </NavLink>
             )}
+
+            <NavLink to="/howitworks" end className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
+              How it Works
+            </NavLink>
+
+            <NavLink to="/about" end className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
+              About us
+            </NavLink>
           </>
         )}
       </nav>
