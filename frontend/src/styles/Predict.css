@@ -1,0 +1,211 @@
+/* Predict.css - Premium Yellow/Dark Form Design */
+
+.pp-page {
+    min-height: 100vh;
+    background-color: #121212;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(250, 204, 21, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(250, 204, 21, 0.02) 0px, transparent 50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.pp-card {
+    width: 100%;
+    max-width: 800px;
+    background: #1f1f1f;
+    border: 1px solid #2f2f2f;
+    border-radius: 24px;
+    padding: 50px 40px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== HEADERS ===== */
+.pp-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0 0 10px 0;
+    text-align: center;
+    color: #fff;
+}
+
+.pp-subtitle {
+    color: #9ca3af;
+    text-align: center;
+    font-size: 16px;
+    margin-bottom: 40px;
+}
+
+/* ===== FORM ===== */
+.pp-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px 30px;
+    align-items: start;
+}
+
+/* ===== FIELD GROUPS ===== */
+.pp-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.pp-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #cbd5e1;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.required-star {
+    color: #ef4444;
+    margin-left: 4px;
+    font-weight: 900;
+    font-size: 16px;
+}
+
+.pp-group input,
+.pp-group select {
+    width: 100%;
+    padding: 14px 16px;
+    background: #121212;
+    border: 1px solid #2f2f2f;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 15px;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.pp-group input:focus,
+.pp-group select:focus {
+    outline: none;
+    border-color: #facc15;
+    box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.15);
+}
+
+.pp-group input.input-error,
+.pp-group select.input-error {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.pp-group input.input-error:focus,
+.pp-group select.input-error:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.field-error-msg {
+    color: #ef4444;
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pp-hint {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 6px;
+}
+
+/* ===== CUSTOM CHECKBOX ===== */
+.pp-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #121212;
+    padding: 14px 16px;
+    border: 1px solid #2f2f2f;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 50px; /* Match standard input height */
+    box-sizing: border-box;
+    margin-top: 26px; /* Push it down to align with inputs (bypassing missing label) */
+}
+
+.pp-checkbox:hover {
+    border-color: #475569;
+}
+
+.pp-checkbox label {
+    cursor: pointer;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.pp-checkbox input {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    accent-color: #facc15;
+    cursor: pointer;
+}
+
+/* ===== SUBMIT BUTTON ===== */
+.pp-btn {
+    grid-column: 1 / -1;
+    margin-top: 10px;
+    width: 100%;
+    padding: 16px;
+    background: #facc15;
+    color: #000;
+    font-size: 18px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 15px rgba(250, 204, 21, 0.2);
+}
+
+.pp-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(250, 204, 21, 0.35);
+}
+
+.pp-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background: #475569;
+    color: #cbd5e1;
+    box-shadow: none;
+}
+
+.pp-global-error {
+    text-align: center;
+    color: #ef4444;
+    font-weight: 600;
+    margin-bottom: 20px;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pp-form {
+        grid-template-columns: 1fr;
+    }
+    .pp-checkbox {
+        margin-top: 0;
+    }
+}
+@media (max-width: 600px) {
+    .pp-card { padding: 40px 20px; }
+    .pp-title { font-size: 26px; }
+}

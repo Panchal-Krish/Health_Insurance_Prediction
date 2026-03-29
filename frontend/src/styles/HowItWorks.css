@@ -1,0 +1,527 @@
+/* HowItWorks.css - Clean, accurate, project-aligned */
+
+.hiw-page {
+    min-height: 100vh;
+    background: #121212;
+    color: #e5e7eb;
+    overflow-x: hidden;
+    position: relative;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* ===== Background Orbs ===== */
+.hiw-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.hiw-orb-1 {
+    top: -100px;
+    right: -100px;
+    width: 500px;
+    height: 500px;
+    background: rgba(250, 204, 21, 0.05);
+}
+
+.hiw-orb-2 {
+    bottom: 200px;
+    left: -150px;
+    width: 400px;
+    height: 400px;
+    background: rgba(250, 204, 21, 0.03);
+}
+
+/* ===== HERO ===== */
+.hiw-hero {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 100px 32px 80px;
+    text-align: center;
+}
+
+.hiw-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #facc15;
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.2);
+    border-radius: 999px;
+    padding: 8px 20px;
+    margin-bottom: 32px;
+}
+
+.hiw-badge-dot {
+    width: 7px;
+    height: 7px;
+    background: #facc15;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(250, 204, 21, 0.5);
+    animation: dot-pulse 2s ease-in-out infinite;
+}
+
+@keyframes dot-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.hiw-heading {
+    font-size: 56px;
+    font-weight: 900;
+    line-height: 1.1;
+    color: #fff;
+    margin: 0 0 24px;
+    letter-spacing: -1px;
+}
+
+.hiw-heading-accent {
+    background: linear-gradient(135deg, #facc15, #eab308);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hiw-sub {
+    font-size: 17px;
+    color: #9ca3af;
+    line-height: 1.7;
+    max-width: 600px;
+    margin: 0 auto 40px;
+}
+
+.hiw-hero-btns {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Buttons */
+.hiw-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 30px;
+    background: #facc15;
+    color: #000;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 16px rgba(250, 204, 21, 0.2);
+}
+
+.hiw-btn-primary:hover {
+    background: #fde047;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(250, 204, 21, 0.35);
+}
+
+.hiw-btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 30px;
+    background: transparent;
+    color: #9ca3af;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.hiw-btn-outline:hover {
+    border-color: #facc15;
+    color: #facc15;
+    transform: translateY(-2px);
+}
+
+.hiw-btn-lg {
+    padding: 16px 36px;
+    font-size: 17px;
+}
+
+/* ===== SECTION HEADERS ===== */
+.hiw-section-head {
+    text-align: center;
+    margin-bottom: 56px;
+}
+
+.hiw-label {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #facc15;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+}
+
+.hiw-section-title {
+    font-size: 38px;
+    font-weight: 800;
+    color: #fff;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.hiw-section-desc {
+    font-size: 16px;
+    color: #9ca3af;
+    margin: 14px auto 0;
+    max-width: 500px;
+    line-height: 1.6;
+}
+
+/* ===== STEPS ===== */
+.hiw-steps-section {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 32px 80px;
+}
+
+.hiw-steps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+.hiw-step {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 18px;
+    padding: 32px 28px;
+    position: relative;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease var(--delay), transform 0.6s ease var(--delay), border-color 0.3s, box-shadow 0.3s;
+}
+
+.hiw-step.hiw-step-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.hiw-step:hover {
+    border-color: var(--step-color);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    transform: translateY(-4px);
+}
+
+.hiw-step-number {
+    font-size: 64px;
+    font-weight: 900;
+    color: var(--step-color);
+    opacity: 0.08;
+    line-height: 1;
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    user-select: none;
+    transition: opacity 0.3s;
+}
+
+.hiw-step:hover .hiw-step-number {
+    opacity: 0.15;
+}
+
+.hiw-step-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.hiw-step-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 10px;
+}
+
+.hiw-step-desc {
+    font-size: 14px;
+    color: #9ca3af;
+    line-height: 1.7;
+    margin: 0 0 18px;
+}
+
+.hiw-step-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.hiw-step-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid;
+    letter-spacing: 0.3px;
+}
+
+/* ===== FACTORS ===== */
+.hiw-factors-section {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 32px 80px;
+}
+
+.hiw-factors-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.hiw-factor {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    padding: 24px 22px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease var(--delay), transform 0.5s ease var(--delay), border-color 0.3s;
+}
+
+.hiw-factor.hiw-factor-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.hiw-factor:hover {
+    border-color: var(--factor-color);
+}
+
+.hiw-factor-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.hiw-factor-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hiw-factor-impact {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.hiw-factor-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #e5e7eb;
+    margin: 0 0 12px;
+}
+
+.hiw-factor-bar-track {
+    height: 5px;
+    background: #2a2a2a;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.hiw-factor-bar-fill {
+    height: 100%;
+    width: 0;
+    background: var(--factor-color);
+    border-radius: 999px;
+    transition: width 1s ease var(--delay);
+}
+
+.hiw-factor-bar-fill.bar-go {
+    width: var(--bar-w);
+}
+
+.hiw-factor-importance {
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* ===== FAQ ===== */
+.hiw-faq-section {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+}
+
+.hiw-faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.hiw-faq {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease var(--delay), transform 0.5s ease var(--delay), border-color 0.3s;
+}
+
+.hiw-faq.hiw-faq-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.hiw-faq:hover {
+    border-color: rgba(250, 204, 21, 0.2);
+}
+
+.hiw-faq.hiw-faq-open {
+    border-color: rgba(250, 204, 21, 0.3);
+}
+
+.hiw-faq-q {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 20px 24px;
+    background: none;
+    border: none;
+    color: #e5e7eb;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+}
+
+.hiw-faq-chevron {
+    color: #6b7280;
+    flex-shrink: 0;
+    transition: transform 0.3s ease, color 0.3s;
+}
+
+.chevron-open {
+    transform: rotate(180deg);
+    color: #facc15;
+}
+
+.hiw-faq-a {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+}
+
+.hiw-faq.hiw-faq-open .hiw-faq-a {
+    max-height: 250px;
+}
+
+.hiw-faq-a p {
+    font-size: 14px;
+    color: #9ca3af;
+    line-height: 1.75;
+    margin: 0;
+    padding: 0 24px 20px;
+}
+
+/* ===== CTA ===== */
+.hiw-cta-section {
+    position: relative;
+    z-index: 1;
+    padding: 40px 32px 100px;
+}
+
+.hiw-cta-card {
+    max-width: 700px;
+    margin: 0 auto;
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 24px;
+    padding: 64px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hiw-cta-glow {
+    position: absolute;
+    top: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    height: 200px;
+    background: radial-gradient(ellipse, rgba(250, 204, 21, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.hiw-cta-card h2 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    margin: 0 0 14px;
+    position: relative;
+    z-index: 1;
+}
+
+.hiw-cta-card p {
+    font-size: 16px;
+    color: #9ca3af;
+    margin: 0 0 32px;
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+}
+
+.hiw-cta-card .hiw-btn-primary {
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+    .hiw-heading { font-size: 42px; }
+    .hiw-steps-grid { grid-template-columns: repeat(2, 1fr); }
+    .hiw-factors-grid { grid-template-columns: repeat(2, 1fr); }
+    .hiw-section-title { font-size: 30px; }
+}
+
+@media (max-width: 600px) {
+    .hiw-hero { padding: 80px 20px 60px; }
+    .hiw-heading { font-size: 32px; }
+    .hiw-steps-grid { grid-template-columns: 1fr; }
+    .hiw-factors-grid { grid-template-columns: 1fr; }
+    .hiw-hero-btns { flex-direction: column; width: 100%; }
+    .hiw-btn-primary, .hiw-btn-outline { justify-content: center; width: 100%; }
+    .hiw-cta-card { padding: 48px 24px; }
+    .hiw-cta-card h2 { font-size: 26px; }
+}

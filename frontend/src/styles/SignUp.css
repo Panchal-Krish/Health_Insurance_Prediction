@@ -1,0 +1,5 @@
+/* SignUp.css - Inherits from SignIn.css shared auth system */
+/* All shared .auth-* and .field-* classes live in SignIn.css */
+/* This file only contains SignUp-specific overrides if needed */
+
+@import './SignIn.css';
