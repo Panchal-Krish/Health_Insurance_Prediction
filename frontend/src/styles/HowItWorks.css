@@ -40,11 +40,11 @@
     z-index: 1;
     max-width: 800px;
     margin: 0 auto;
-    padding: 40px 32px;
+    padding: 80px 32px 40px;
     min-height: calc(100vh - 80px);
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     text-align: center;
     animation: hiw-fade-in 1s ease-out forwards;

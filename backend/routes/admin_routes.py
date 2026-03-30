@@ -116,9 +116,9 @@ def get_managers():
         return jsonify({"message": "Server error fetching managers"}), 500
 
 
-@admin_bp.route("/admin/contacts", methods=["GET"])
+@admin_bp.route("/api/contacts", methods=["GET"])
 @token_required
-@role_required(['admin'])
+@role_required(['admin', 'manager'])
 def admin_contacts():
     try:
         messages = list(
@@ -136,9 +136,9 @@ def admin_contacts():
         return jsonify({"message": "Server error fetching contacts"}), 500
 
 
-@admin_bp.route("/admin/contacts/<contact_id>/read", methods=["PUT"])
+@admin_bp.route("/api/contacts/<contact_id>/read", methods=["PUT"])
 @token_required
-@role_required(['admin'])
+@role_required(['admin', 'manager'])
 def mark_contact_read(contact_id):
     try:
         result = contacts_collection.update_one(

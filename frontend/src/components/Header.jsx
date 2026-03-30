@@ -72,7 +72,7 @@ function Header() {
           <>
             {!isLoggedIn ? (
               <NavLink to="/contact" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>
-                Contact
+                Contact Us
               </NavLink>
             ) : (
               <NavLink to="/helpdesk" className={({ isActive }) => isActive ? 'active' : ''} onClick={closeMobileMenu}>

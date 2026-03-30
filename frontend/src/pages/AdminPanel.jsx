@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import {
   Loader, AlertCircle, CheckCircle, UserPlus,
-  Shield, Ticket, Users, RefreshCw, X, Mail, MailOpen
+  Shield, Ticket, Users, RefreshCw, X, Mail, MailOpen, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { fetchWithAuth } from "../utils/auth";
 import "../styles/AdminPanel.css";
@@ -18,6 +18,7 @@ function AdminPanel() {
   const [tickets, setTickets] = useState([]);
   const [managers, setManagers] = useState([]);
   const [messages, setMessages] = useState([]);   // Option 4: contact messages
+  const [messagesPage, setMessagesPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
@@ -101,7 +102,7 @@ function AdminPanel() {
   // Option 4: fetch contact messages
   const fetchMessages = async () => {
     try {
-      const response = await fetchWithAuth(`${API_URL}/admin/contacts`);
+      const response = await fetchWithAuth(`${API_URL}/api/contacts`);
       if (!response) return;
       if (!response.ok) throw new Error("Failed to fetch messages");
       setMessages(await response.json());
@@ -228,7 +229,7 @@ function AdminPanel() {
   const markAsRead = async (messageId) => {
     try {
       const response = await fetchWithAuth(
-        `${API_URL}/admin/contacts/${messageId}/read`,
+        `${API_URL}/api/contacts/${messageId}/read`,
         { method: "PUT" }
       );
       if (!response) return;
@@ -275,17 +276,20 @@ function AdminPanel() {
 
   if (loading && tickets.length === 0) {
     return (
-      <div className="admin-container">
-        <div className="loading-state">
-          <Loader className="spinner-large" />
-          <p>Loading admin panel...</p>
+      <div className="admin-page">
+        <div className="admin-container">
+          <div className="loading-state">
+            <Loader className="spinner-large" />
+            <p>Loading admin panel...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="admin-container">
+    <div className="admin-page">
+      <div className="admin-container">
       {/* Header */}
       <div className="admin-header">
         <div className="header-left">
@@ -322,29 +326,36 @@ function AdminPanel() {
       {/* Stats Cards */}
       <div className="stats-grid">
         <div className="stat-card">
-          <Ticket className="stat-icon" />
+          <div className="stat-icon-wrapper icon-tickets">
+            <Ticket className="stat-icon" size={28} />
+          </div>
           <div className="stat-info">
             <div className="stat-value">{tickets.length}</div>
             <div className="stat-label">Total Tickets</div>
           </div>
         </div>
         <div className="stat-card">
-          <Users className="stat-icon" />
+          <div className="stat-icon-wrapper icon-managers">
+            <Users className="stat-icon" size={28} />
+          </div>
           <div className="stat-info">
             <div className="stat-value">{managers.length}</div>
             <div className="stat-label">Managers</div>
           </div>
         </div>
-        {/* FIX #26: strict equality for resolved count */}
         <div className="stat-card">
-          <CheckCircle className="stat-icon success" />
+          <div className="stat-icon-wrapper icon-resolved">
+            <CheckCircle className="stat-icon" size={28} />
+          </div>
           <div className="stat-info">
             <div className="stat-value">{resolvedCount}</div>
             <div className="stat-label">Resolved</div>
           </div>
         </div>
         <div className="stat-card">
-          <Mail className="stat-icon" />
+          <div className="stat-icon-wrapper icon-messages">
+            <Mail className="stat-icon" size={28} />
+          </div>
           <div className="stat-info">
             <div className="stat-value">{unreadCount}</div>
             <div className="stat-label">Unread Messages</div>
@@ -493,54 +504,88 @@ function AdminPanel() {
             )}
           </div>
 
-          {messages.length === 0 ? (
-            <div className="empty-state">
-              <Mail className="empty-icon" />
-              <p>No contact messages yet</p>
-            </div>
-          ) : (
-            <div className="messages-list">
-              {messages.map((msg) => (
-                <div
-                  key={msg._id}
-                  className={`message-card ${msg.status === "unread" ? "unread" : "read"}`}
-                >
-                  <div className="message-header">
-                    <div className="message-meta">
-                      <span className="message-name">{msg.name}</span>
-                      <span className="message-email">{msg.email}</span>
-                      <span className="message-date">
-                        {new Date(msg.created_at).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="message-actions">
-                      {msg.status === "unread" ? (
-                        <span className="unread-dot" title="Unread" />
-                      ) : (
-                        <MailOpen size={16} className="read-icon" title="Read" />
-                      )}
-                      {msg.status === "unread" && (
-                        <button
-                          className="action-btn small"
-                          onClick={() => markAsRead(msg._id)}
-                          title="Mark as read"
-                        >
-                          Mark Read
-                        </button>
-                      )}
-                    </div>
-                  </div>
+          {(() => {
+            const recordsPerPage = 5;
+            const indexOfLastRecord = messagesPage * recordsPerPage;
+            const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+            const currentMessages = messages.slice(indexOfFirstRecord, indexOfLastRecord);
+            const totalPages = Math.ceil(messages.length / recordsPerPage);
 
-                  <div className="message-subject">
-                    <strong>{msg.subject}</strong>
-                  </div>
-                  <div className="message-body">
-                    {msg.message}
-                  </div>
+            return messages.length === 0 ? (
+              <div className="empty-state">
+                <Mail className="empty-icon" />
+                <p>No contact messages yet</p>
+              </div>
+            ) : (
+              <>
+                <div className="messages-list">
+                  {currentMessages.map((msg) => (
+                    <div
+                      key={msg._id}
+                      className={`message-card ${msg.status === "unread" ? "unread" : "read"}`}
+                    >
+                      <div className="message-header">
+                        <div className="message-meta">
+                          <span className="message-name">{msg.name}</span>
+                          <span className="message-email">{msg.email}</span>
+                          <span className="message-date">
+                            {new Date(msg.created_at).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="message-actions">
+                          {msg.status === "unread" ? (
+                            <span className="unread-dot" title="Unread" />
+                          ) : (
+                            <MailOpen size={16} className="read-icon" title="Read" />
+                          )}
+                          {msg.status === "unread" && (
+                            <button
+                              className="action-btn small"
+                              onClick={() => markAsRead(msg._id)}
+                              title="Mark as read"
+                            >
+                              Mark Read
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="message-subject">
+                        <strong>{msg.subject}</strong>
+                      </div>
+                      <div className="message-body">
+                        {msg.message}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
+
+                {totalPages > 1 && (
+                  <div className="pagination-controls" style={{ marginTop: '20px' }}>
+                    <button 
+                      className="page-btn" 
+                      onClick={() => setMessagesPage(p => Math.max(1, p - 1))}
+                      disabled={messagesPage === 1}
+                    >
+                      <ChevronLeft size={18} />
+                      Prev
+                    </button>
+                    <span className="page-info">
+                      Page {messagesPage} of {totalPages}
+                    </span>
+                    <button 
+                      className="page-btn" 
+                      onClick={() => setMessagesPage(p => Math.min(totalPages, p + 1))}
+                      disabled={messagesPage === totalPages}
+                    >
+                      Next
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </>
       )}
 
@@ -648,6 +693,7 @@ function AdminPanel() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
