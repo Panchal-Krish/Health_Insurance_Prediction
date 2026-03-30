@@ -22,6 +22,8 @@ def predict_premium():
             smoker = int(data["smoker"])
             sex = int(data["sex"])
             region = str(data["region"])
+            prediction_for = str(data.get("prediction_for", "self"))
+            beneficiary_name = data.get("beneficiary_name") or None
         except (ValueError, TypeError):
             return jsonify({"message": "Invalid input format"}), 400
         
@@ -43,6 +45,14 @@ def predict_premium():
         if region not in ['northeast', 'northwest', 'southeast', 'southwest']:
             return jsonify({"message": "Invalid region"}), 400
 
+        if prediction_for not in ['self', 'other']:
+            return jsonify({"message": "prediction_for must be 'self' or 'other'"}), 400
+
+        if prediction_for == 'other':
+            if not beneficiary_name or len(beneficiary_name.strip()) < 2:
+                return jsonify({"message": "Beneficiary name is required when predicting for someone else"}), 400
+            beneficiary_name = beneficiary_name.strip()[:100]
+
         premium    = predict_premium_ml(age=age, sex=sex, bmi=bmi, children=children, smoker=smoker, region=region)
         user_id    = request.current_user.get('user_id')
         user_email = request.current_user.get('email')
@@ -51,6 +61,8 @@ def predict_premium():
         record = {
             "user_id":           user_id,
             "email":             user_email,
+            "prediction_for":    prediction_for,
+            "beneficiary_name":  beneficiary_name,
             "age":               age,
             "gender":            "male" if sex == 1 else "female",
             "bmi":               bmi,
@@ -83,7 +95,10 @@ def premium_history():
         if not record:
             return jsonify(None), 200
         if "last_checked_at" in record:
-            record["last_checked_at"] = record["last_checked_at"].isoformat()
+            dt = record["last_checked_at"]
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            record["last_checked_at"] = dt.isoformat()
         return jsonify(record), 200
     except Exception as e:
         print(f"Premium history error: {e}")
@@ -101,7 +116,10 @@ def my_predictions():
         )
         for log in logs:
             if "last_checked_at" in log:
-                log["last_checked_at"] = log["last_checked_at"].isoformat()
+                dt = log["last_checked_at"]
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                log["last_checked_at"] = dt.isoformat()
         return jsonify(logs), 200
     except Exception as e:
         print(f"Prediction logs error: {e}")

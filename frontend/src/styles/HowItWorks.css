@@ -40,8 +40,25 @@
     z-index: 1;
     max-width: 800px;
     margin: 0 auto;
-    padding: 100px 32px 80px;
+    padding: 40px 32px;
+    min-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     text-align: center;
+    animation: hiw-fade-in 1s ease-out forwards;
+}
+
+@keyframes hiw-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .hiw-badge {
@@ -516,7 +533,10 @@
 }
 
 @media (max-width: 600px) {
-    .hiw-hero { padding: 80px 20px 60px; }
+    .hiw-hero {
+        padding: 40px 20px;
+        min-height: calc(100vh - 80px);
+    }
     .hiw-heading { font-size: 32px; }
     .hiw-steps-grid { grid-template-columns: 1fr; }
     .hiw-factors-grid { grid-template-columns: 1fr; }

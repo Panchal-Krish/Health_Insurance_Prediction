@@ -40,8 +40,25 @@
     z-index: 1;
     max-width: 800px;
     margin: 0 auto;
-    padding: 100px 32px 70px;
+    padding: 40px 32px;
+    min-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     text-align: center;
+    animation: about-fade-in 1s ease-out forwards;
+}
+
+@keyframes about-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .about-badge {
@@ -528,7 +545,10 @@
 }
 
 @media (max-width: 600px) {
-    .about-hero { padding: 80px 20px 60px; }
+    .about-hero { 
+        padding: 40px 20px; 
+        min-height: calc(100vh - 80px);
+    }
     .about-heading { font-size: 32px; }
     .about-hero-stats {
         flex-direction: column;

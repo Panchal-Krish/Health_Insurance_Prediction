@@ -1,21 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-    AlertCircle, Loader, Activity, User, HeartPulse, 
+import {
+    AlertCircle, Loader, Activity, User, HeartPulse,
     Flame, MapPin, Calculator, CalendarClock, DollarSign,
-    ChevronRight, LogIn
+    ChevronRight, ChevronLeft, LogIn, Users
 } from 'lucide-react';
 import { fetchWithAuth } from '../utils/auth';
 import { useAuth } from '../context/AuthContext';
 import './../styles/Dashboard.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-
-const getPremiumRisk = (premium) => {
-    if (premium < 10000) return { label: 'Low Risk', percent: 30, class: 'risk-low', color: '#10b981' };
-    if (premium < 25000) return { label: 'Medium Risk', percent: 65, class: 'risk-medium', color: '#facc15' };
-    return { label: 'High Risk', percent: 95, class: 'risk-high', color: '#ef4444' };
-};
 
 function Dashboard() {
     const navigate = useNavigate();
@@ -24,6 +18,8 @@ function Dashboard() {
     const [predictions, setPredictions] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const recordsPerPage = 5;
 
     useEffect(() => {
         if (!isLoggedIn) return;
@@ -37,11 +33,11 @@ function Dashboard() {
             // Fetch the ENTIRE prediction history timeline
             const response = await fetchWithAuth(`${API_URL}/my-predictions`);
             if (!response) return; // intercepted by auth redirect
-            
+
             if (!response.ok) {
                 throw new Error('Failed to fetch prediction history');
             }
-            
+
             const data = await response.json();
             setPredictions(data);
         } catch (err) {
@@ -58,7 +54,7 @@ function Dashboard() {
                 <div className="loading-container">
                     <Loader className="spinner-large" />
                     <h2>Analyzing your data</h2>
-                    <p style={{color: '#94a3b8'}}>Securely fetching your insurance history...</p>
+                    <p style={{ color: '#94a3b8' }}>Securely fetching your insurance history...</p>
                 </div>
             </div>
         );
@@ -71,7 +67,7 @@ function Dashboard() {
                     <AlertCircle className="error-icon-large" />
                     <h2>Something went wrong</h2>
                     <p>{error}</p>
-                    <button className="new-predict-btn" onClick={fetchPredictions} style={{marginTop: '20px'}}>
+                    <button className="new-predict-btn" onClick={fetchPredictions} style={{ marginTop: '20px' }}>
                         Try Again
                     </button>
                 </div>
@@ -108,13 +104,16 @@ function Dashboard() {
 
     // DATA STATE: User has at least 1 prediction
     const latest = predictions[0]; // The backend sorted it descending by date
-    const history = predictions.slice(1); // The rest of the history
-    const risk = getPremiumRisk(latest.predicted_premium);
+
+    // Pagination logic
+    const totalPages = Math.ceil(predictions.length / recordsPerPage);
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const currentPredictions = predictions.slice(startIndex, startIndex + recordsPerPage);
 
     return (
         <div className="dashboard-page">
             <div className="dashboard-container">
-                
+
                 {/* Header */}
                 <div className="dashboard-header">
                     <div>
@@ -134,32 +133,26 @@ function Dashboard() {
                             <Activity size={18} />
                             Latest Estimated Premium
                         </div>
-                        
+
                         <h2 className="hero-premium">
                             <span className="currency">$</span>
                             {latest.predicted_premium.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </h2>
-                        
-                        <div className="risk-container">
-                            <div className="risk-bar">
-                                <div 
-                                    className="risk-fill" 
-                                    style={{ 
-                                        width: `${risk.percent}%`,
-                                        background: `linear-gradient(90deg, #10b981 0%, ${risk.color} 100%)` 
-                                    }} 
-                                />
-                            </div>
-                            <div className="risk-labels">
-                                <span style={{ color: '#94a3b8' }}>Evaluated Risk Assessment</span>
-                                <span style={{ color: risk.color, fontWeight: '700' }}>{risk.label}</span>
-                            </div>
+
+                        {/* Who is this prediction for? */}
+                        <div className="predicted-for-badge">
+                            {latest.prediction_for === 'other' ? <Users size={14} /> : <User size={14} />}
+                            <span>
+                                {latest.prediction_for === 'other' && latest.beneficiary_name
+                                    ? `For ${latest.beneficiary_name}`
+                                    : 'For Self'}
+                            </span>
                         </div>
                     </div>
                 </div>
 
                 {/* Vitals Grid */}
-                <h3 style={{ fontSize: '20px', marginBottom: '20px', color: '#fff' }}>Your Profile Summary</h3>
+                <h3 style={{ fontSize: '20px', marginBottom: '20px', color: '#fff' }}>Latest Prediction Summary</h3>
                 <div className="stats-grid">
                     <div className="stat-card">
                         <div className="stat-icon-wrapper icon-age"><User size={24} /></div>
@@ -168,7 +161,7 @@ function Dashboard() {
                             <span className="stat-value">{latest.age} yrs • {latest.gender === 'male' ? 'M' : 'F'}</span>
                         </div>
                     </div>
-                    
+
                     <div className="stat-card">
                         <div className="stat-icon-wrapper icon-bmi"><Activity size={24} /></div>
                         <div className="stat-details">
@@ -181,8 +174,11 @@ function Dashboard() {
                         <div className="stat-icon-wrapper icon-smoker"><Flame size={24} /></div>
                         <div className="stat-details">
                             <span className="stat-label">Smoker Status</span>
-                            <span className="stat-value" style={{ color: latest.smoker ? '#ef4444' : '#10b981' }}>
-                                {latest.smoker ? 'Active' : 'Non-Smoker'}
+                            <span className="stat-value" style={{
+                                color: latest.smoker ? '#ef4444' : '#10b981',
+                                fontSize: latest.smoker ? '27px' : '27px'
+                            }}>
+                                {latest.smoker ? 'Smoker' : 'Non-Smoker'}
                             </span>
                         </div>
                     </div>
@@ -197,58 +193,86 @@ function Dashboard() {
                 </div>
 
                 {/* History Section */}
-                {history.length > 0 && (
+                {predictions.length > 0 && (
                     <div className="history-section">
                         <div className="history-header">
                             <CalendarClock className="history-icon" size={24} />
                             <h2>Prediction Timeline</h2>
                         </div>
-                        
-                        <div className="table-container">
-                            <table className="history-table">
-                                <thead>
-                                    <tr>
-                                        <th>Date Checked</th>
-                                        <th>Traits Profile</th>
-                                        <th>Risk Status</th>
-                                        <th>Assessed Premium</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {history.map((item, index) => {
-                                        const r = getPremiumRisk(item.predicted_premium);
-                                        return (
-                                            <tr key={index}>
-                                                <td>
-                                                    <div style={{ fontWeight: 500 }}>
-                                                        {new Date(item.last_checked_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                    </div>
-                                                    <div style={{ color: '#64748b', fontSize: '13px', marginTop: '4px' }}>
-                                                        {new Date(item.last_checked_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div className="trait-badges">
-                                                        <span className="trait-badge">BMI: {item.bmi}</span>
-                                                        {item.smoker && <span className="trait-badge" style={{color: '#fca5a5', background: 'rgba(239,68,68,0.1)'}}>Smoker</span>}
-                                                        {item.children > 0 && <span className="trait-badge">{item.children} Child</span>}
-                                                        <span className="trait-badge" style={{textTransform: 'capitalize'}}>{item.region}</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <span className={`risk-badge ${r.class}`}>
-                                                        {r.label}
-                                                    </span>
-                                                </td>
-                                                <td className="premium-cell">
-                                                    ${item.predicted_premium.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
+
+                        <div className="history-list">
+                            {currentPredictions.map((item, index) => {
+                                return (
+                                    <div className="history-item" key={index}>
+                                        
+                                        {/* Group 1: Date & Time */}
+                                        <div className="hi-section hi-date">
+                                            <div className="hi-date-main">
+                                                {new Date(item.last_checked_at).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', month: 'short', day: 'numeric', year: 'numeric' })}
+                                            </div>
+                                            <div className="hi-time-sub">
+                                                {new Date(item.last_checked_at).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                        </div>
+
+                                        {/* Group 2: Predicted For */}
+                                        <div className="hi-section hi-for">
+                                            <span className="hi-label">For</span>
+                                            <div className="hi-for-value">
+                                                {item.prediction_for === 'other' ? <Users size={14} /> : <User size={14} />}
+                                                {item.prediction_for === 'other' && item.beneficiary_name ? item.beneficiary_name : 'Self'}
+                                            </div>
+                                        </div>
+
+                                        {/* Group 3: Traits */}
+                                        <div className="hi-section hi-traits">
+                                            <span className="hi-label">Traits</span>
+                                            <div className="trait-badges">
+                                                <span className="trait-badge">BMI: {item.bmi}</span>
+                                                {item.smoker && <span className="trait-badge trait-smoker">Smoker</span>}
+                                                {item.children > 0 && <span className="trait-badge">{item.children} {item.children === 1 ? 'Child' : 'Children'}</span>}
+                                                <span className="trait-badge trait-region">{item.region}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Group 4: Premium Amount */}
+                                        <div className="hi-section hi-premium">
+                                            <span className="hi-label">Assessed Premium</span>
+                                            <div className="hi-premium-value">
+                                                <span className="hi-currency">$</span>
+                                                {item.predicted_premium.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                );
+                            })}
                         </div>
+                        
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="pagination-controls">
+                                <button 
+                                    className="page-btn" 
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                >
+                                    <ChevronLeft size={18} />
+                                    Prev
+                                </button>
+                                <span className="page-info">
+                                    Page {currentPage} of {totalPages}
+                                </span>
+                                <button 
+                                    className="page-btn" 
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    Next
+                                    <ChevronRight size={18} />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
 

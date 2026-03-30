@@ -196,6 +196,57 @@
     border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
+/* ===== TOGGLE GROUP (Self / Other) ===== */
+.pp-toggle-group {
+    display: flex;
+    gap: 10px;
+}
+
+.pp-toggle-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 16px;
+    background: #121212;
+    border: 1px solid #2f2f2f;
+    border-radius: 12px;
+    color: #9ca3af;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pp-toggle-btn:hover {
+    border-color: #475569;
+    color: #fff;
+}
+
+.pp-toggle-active {
+    background: rgba(250, 204, 21, 0.1);
+    border-color: #facc15;
+    color: #facc15;
+}
+
+/* ===== SLIDE-IN ANIMATION ===== */
+.pp-slide-in {
+    animation: pp-slide-down 0.3s ease-out forwards;
+}
+
+@keyframes pp-slide-down {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .pp-form {

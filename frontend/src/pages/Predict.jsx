@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../utils/auth";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, User, Users } from "lucide-react";
 import "./../styles/Predict.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
@@ -10,6 +10,8 @@ function Predict() {
     const navigate = useNavigate();
 
     const [form, setForm] = useState({
+        prediction_for: "self",
+        beneficiary_name: "",
         age: "",
         gender: "male",
         bmi: "",
@@ -42,6 +44,15 @@ function Predict() {
 
     const validateForm = () => {
         const newErrors = {};
+
+        // === BENEFICIARY NAME (only if "other") ===
+        if (form.prediction_for === "other") {
+            if (!form.beneficiary_name.trim()) {
+                newErrors.beneficiary_name = "Name is required when predicting for someone else";
+            } else if (form.beneficiary_name.trim().length < 2) {
+                newErrors.beneficiary_name = "Name must be at least 2 characters";
+            }
+        }
 
         // === AGE ===
         if (!form.age && form.age !== 0) {
@@ -104,7 +115,9 @@ function Predict() {
                 bmi: Number(form.bmi),
                 children: Number(form.children),
                 smoker: form.smoker ? 1 : 0,
-                region: form.region
+                region: form.region,
+                prediction_for: form.prediction_for,
+                beneficiary_name: form.prediction_for === "other" ? form.beneficiary_name.trim() : null
             };
 
             const response = await fetchWithAuth(
@@ -149,6 +162,50 @@ function Predict() {
                 )}
 
                 <form className="pp-form" onSubmit={handleSubmit}>
+
+                    {/* Prediction For */}
+                    <div className="pp-group">
+                        <label>This prediction is for <span className="required-star">*</span></label>
+                        <div className="pp-toggle-group">
+                            <button
+                                type="button"
+                                className={`pp-toggle-btn ${form.prediction_for === 'self' ? 'pp-toggle-active' : ''}`}
+                                onClick={() => { setForm({ ...form, prediction_for: 'self', beneficiary_name: '' }); if (errors.beneficiary_name) setErrors({ ...errors, beneficiary_name: null }); }}
+                            >
+                                <User size={16} />
+                                Myself
+                            </button>
+                            <button
+                                type="button"
+                                className={`pp-toggle-btn ${form.prediction_for === 'other' ? 'pp-toggle-active' : ''}`}
+                                onClick={() => setForm({ ...form, prediction_for: 'other' })}
+                            >
+                                <Users size={16} />
+                                Someone Else
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Beneficiary Name (conditional) */}
+                    {form.prediction_for === 'other' && (
+                        <div className="pp-group pp-slide-in">
+                            <label>Beneficiary Name <span className="required-star">*</span></label>
+                            <input
+                                type="text"
+                                name="beneficiary_name"
+                                className={errors.beneficiary_name ? 'input-error' : ''}
+                                placeholder="Enter the person's name"
+                                value={form.beneficiary_name}
+                                onChange={handleChange}
+                                maxLength={100}
+                            />
+                            {errors.beneficiary_name && (
+                                <span className="field-error-msg">
+                                    <AlertCircle size={14} /> {errors.beneficiary_name}
+                                </span>
+                            )}
+                        </div>
+                    )}
 
                     {/* Age */}
                     <div className="pp-group">
