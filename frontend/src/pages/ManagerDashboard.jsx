@@ -157,7 +157,7 @@ function ManagerDashboard() {
 
   const openTickets = useMemo(() => tickets.filter(t => t.status === 'Open').length, [tickets]);
   const inProgressTickets = useMemo(() => tickets.filter(t => t.status === 'In Progress').length, [tickets]);
-  
+
   const unreadCount = useMemo(() =>
     messages.filter(m => m.status === "unread").length,
     [messages]
@@ -379,90 +379,90 @@ function ManagerDashboard() {
               )}
             </div>
 
-          {(() => {
-            const recordsPerPage = 5;
-            const indexOfLastRecord = messagesPage * recordsPerPage;
-            const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-            const currentMessages = messages.slice(indexOfFirstRecord, indexOfLastRecord);
-            const totalPages = Math.ceil(messages.length / recordsPerPage);
+            {(() => {
+              const recordsPerPage = 5;
+              const indexOfLastRecord = messagesPage * recordsPerPage;
+              const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+              const currentMessages = messages.slice(indexOfFirstRecord, indexOfLastRecord);
+              const totalPages = Math.ceil(messages.length / recordsPerPage);
 
-            return messages.length === 0 ? (
-              <div className="empty-state">
-                <Mail className="empty-icon" />
-                <p>No contact messages yet</p>
-              </div>
-            ) : (
-              <>
-                <div className="messages-list">
-                  {currentMessages.map((msg) => (
-                    <div
-                      key={msg._id}
-                      className={`message-card ${msg.status === "unread" ? "unread" : "read"}`}
-                    >
-                      <div className="message-header">
-                        <div className="message-meta">
-                          <span className="message-name">{msg.name}</span>
-                          <span className="message-email">{msg.email}</span>
-                          <span className="message-date">
-                            {new Date(msg.created_at).toLocaleString()}
-                          </span>
-                        </div>
-                        <div className="message-actions">
-                          {msg.status === "unread" ? (
-                            <span className="unread-dot" title="Unread" />
-                          ) : (
-                            <MailOpen size={16} className="read-icon" title="Read" />
-                          )}
-                          {msg.status === "unread" && (
-                            <button
-                              className="action-btn small"
-                              onClick={() => markAsRead(msg._id)}
-                              title="Mark as read"
-                            >
-                              Mark Read
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="message-subject">
-                        <strong>{msg.subject}</strong>
-                      </div>
-                      <div className="message-body">
-                        {msg.message}
-                      </div>
-                    </div>
-                  ))}
+              return messages.length === 0 ? (
+                <div className="empty-state">
+                  <Mail className="empty-icon" />
+                  <p>No contact messages yet</p>
                 </div>
+              ) : (
+                <>
+                  <div className="messages-list">
+                    {currentMessages.map((msg) => (
+                      <div
+                        key={msg._id}
+                        className={`message-card ${msg.status === "unread" ? "unread" : "read"}`}
+                      >
+                        <div className="message-header">
+                          <div className="message-meta">
+                            <span className="message-name">{msg.name}</span>
+                            <span className="message-email">{msg.email}</span>
+                            <span className="message-date">
+                              {new Date(msg.created_at).toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="message-actions">
+                            {msg.status === "unread" ? (
+                              <span className="unread-dot" title="Unread" />
+                            ) : (
+                              <MailOpen size={16} className="read-icon" title="Read" />
+                            )}
+                            {msg.status === "unread" && (
+                              <button
+                                className="action-btn small"
+                                onClick={() => markAsRead(msg._id)}
+                                title="Mark as read"
+                              >
+                                Mark Read
+                              </button>
+                            )}
+                          </div>
+                        </div>
 
-                {totalPages > 1 && (
-                  <div className="pagination-controls" style={{ marginTop: '20px' }}>
-                    <button 
-                      className="page-btn" 
-                      onClick={() => setMessagesPage(p => Math.max(1, p - 1))}
-                      disabled={messagesPage === 1}
-                    >
-                      <ChevronLeft size={18} />
-                      Prev
-                    </button>
-                    <span className="page-info">
-                      Page {messagesPage} of {totalPages}
-                    </span>
-                    <button 
-                      className="page-btn" 
-                      onClick={() => setMessagesPage(p => Math.min(totalPages, p + 1))}
-                      disabled={messagesPage === totalPages}
-                    >
-                      Next
-                      <ChevronRight size={18} />
-                    </button>
+                        <div className="message-subject">
+                          <strong>{msg.subject}</strong>
+                        </div>
+                        <div className="message-body">
+                          {msg.message}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                )}
-              </>
-            );
-          })()}
-        </>
-      )}
+
+                  {totalPages > 1 && (
+                    <div className="pagination-controls" style={{ marginTop: '20px' }}>
+                      <button
+                        className="page-btn"
+                        onClick={() => setMessagesPage(p => Math.max(1, p - 1))}
+                        disabled={messagesPage === 1}
+                      >
+                        <ChevronLeft size={18} />
+                        Prev
+                      </button>
+                      <span className="page-info">
+                        Page {messagesPage} of {totalPages}
+                      </span>
+                      <button
+                        className="page-btn"
+                        onClick={() => setMessagesPage(p => Math.min(totalPages, p + 1))}
+                        disabled={messagesPage === totalPages}
+                      >
+                        Next
+                        <ChevronRight size={18} />
+                      </button>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </>
+        )}
 
         {/* Update Ticket Modal */}
         {showResponseModal && currentTicket && (

@@ -18,11 +18,6 @@ function Header() {
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
-  const handleNav = (path) => {
-    setMobileMenuOpen(false);
-    navigate(path);
-  };
-
   return (
     <header className="header">
       {/* Logo */}
