@@ -459,7 +459,7 @@ function AdminPanel() {
                       <td>{ticket.assigned_to || "Unassigned"}</td>
                       <td className="notes-cell">{ticket.manager_response || "—"}</td>
                       <td className="actions-cell">
-                        {/* FIX #10: Controlled select with explicit Assign button */}
+                        {/* Assign manager dropdown */}
                         <select
                           value={assignSelections[ticket.ticket_id] || ""}
                           onChange={(e) => handleAssignChange(ticket.ticket_id, e.target.value)}
@@ -470,20 +470,22 @@ function AdminPanel() {
                             <option key={m.email} value={m.email}>{m.fullName}</option>
                           ))}
                         </select>
-                        <button
-                          className="action-btn assign"
-                          onClick={() => assignTicket(ticket.ticket_id)}
-                          disabled={!assignSelections[ticket.ticket_id]}
-                          title="Confirm assignment"
-                        >
-                          Assign
-                        </button>
-                        <button
-                          className="action-btn"
-                          onClick={() => openResponseModal(ticket)}
-                        >
-                          Update
-                        </button>
+                        <div className="actions-row">
+                          <button
+                            className="action-btn assign"
+                            onClick={() => assignTicket(ticket.ticket_id)}
+                            disabled={!assignSelections[ticket.ticket_id]}
+                            title="Confirm assignment"
+                          >
+                            Assign
+                          </button>
+                          <button
+                            className="action-btn"
+                            onClick={() => openResponseModal(ticket)}
+                          >
+                            Update
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))

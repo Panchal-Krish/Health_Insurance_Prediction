@@ -91,7 +91,7 @@
 }
 
 .hiw-heading {
-    font-size: 56px;
+    font-size: clamp(36px, 6vw, 56px);
     font-weight: 900;
     line-height: 1.1;
     color: #fff;
@@ -220,8 +220,10 @@
 }
 
 .hiw-step {
-    background: #1a1a1a;
-    border: 1px solid #2a2a2a;
+    background: rgba(26, 26, 26, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 18px;
     padding: 32px 28px;
     position: relative;
@@ -313,13 +315,15 @@
 }
 
 .hiw-factor {
-    background: #1a1a1a;
-    border: 1px solid #2a2a2a;
+    background: rgba(26, 26, 26, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 14px;
     padding: 24px 22px;
     opacity: 0;
     transform: translateY(20px);
-    transition: opacity 0.5s ease var(--delay), transform 0.5s ease var(--delay), border-color 0.3s;
+    transition: opacity 0.5s ease var(--delay), transform 0.5s ease var(--delay), border-color 0.3s, box-shadow 0.3s;
 }
 
 .hiw-factor.hiw-factor-visible {
@@ -403,13 +407,15 @@
 }
 
 .hiw-faq {
-    background: #1a1a1a;
-    border: 1px solid #2a2a2a;
+    background: rgba(26, 26, 26, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 14px;
     overflow: hidden;
     opacity: 0;
     transform: translateY(16px);
-    transition: opacity 0.5s ease var(--delay), transform 0.5s ease var(--delay), border-color 0.3s;
+    transition: opacity 0.5s ease var(--delay), transform 0.5s ease var(--delay), border-color 0.3s, box-shadow 0.3s;
 }
 
 .hiw-faq.hiw-faq-visible {
@@ -481,8 +487,11 @@
 .hiw-cta-card {
     max-width: 700px;
     margin: 0 auto;
-    background: #1a1a1a;
-    border: 1px solid #2a2a2a;
+    background: rgba(31, 31, 31, 0.6);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.05);
     border-radius: 24px;
     padding: 64px 40px;
     text-align: center;
@@ -526,21 +535,29 @@
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
-    .hiw-heading { font-size: 42px; }
-    .hiw-steps-grid { grid-template-columns: repeat(2, 1fr); }
-    .hiw-factors-grid { grid-template-columns: repeat(2, 1fr); }
+    .hiw-steps-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .hiw-factors-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
     .hiw-section-title { font-size: 30px; }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .hiw-hero {
         padding: 40px 20px;
         min-height: calc(100vh - 80px);
     }
-    .hiw-heading { font-size: 32px; }
+    .hiw-steps-section, .hiw-factors-section, .hiw-faq-section {
+        padding: 40px 20px 60px;
+    }
+    .hiw-faq-q {
+        padding: 16px 20px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 600px) {
     .hiw-steps-grid { grid-template-columns: 1fr; }
     .hiw-factors-grid { grid-template-columns: 1fr; }
-    .hiw-hero-btns { flex-direction: column; width: 100%; }
+    .hiw-hero-btns { flex-direction: column; width: 100%; padding: 0 16px; }
     .hiw-btn-primary, .hiw-btn-outline { justify-content: center; width: 100%; }
     .hiw-cta-card { padding: 48px 24px; }
     .hiw-cta-card h2 { font-size: 26px; }

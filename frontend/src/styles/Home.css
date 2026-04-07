@@ -14,10 +14,10 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: center; /* Center the hero content instead of squishing it at the top */
     align-items: center;
     text-align: center;
-    padding: 80px 32px 40px;
+    padding: 80px 32px;
     min-height: calc(100vh - 80px);
     overflow: hidden;
     background: #121212;
@@ -91,7 +91,7 @@
 
 /* Heading */
 .hero-heading {
-    font-size: 64px;
+    font-size: clamp(36px, 6vw, 64px);
     font-weight: 900;
     line-height: 1.1;
     margin: 0 0 28px 0;
@@ -267,17 +267,20 @@
 }
 
 .feature-card {
-    background: #1a1a1a;
-    border: 1px solid #2a2a2a;
+    background: rgba(26, 26, 26, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 18px;
     padding: 36px 32px;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .feature-card:hover {
-    transform: translateY(-6px);
+    transform: translateY(-6px) scale(1.02);
     border-color: rgba(250, 204, 21, 0.3);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    background: rgba(31, 31, 31, 0.8);
 }
 
 .feature-icon-wrap {
@@ -337,8 +340,11 @@
     max-width: 800px;
     margin: 0 auto;
     text-align: center;
-    background: #1a1a1a;
-    border: 1px solid #2a2a2a;
+    background: rgba(31, 31, 31, 0.6);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.05);
     border-radius: 24px;
     padding: 64px 40px;
     overflow: hidden;
@@ -385,16 +391,9 @@
    RESPONSIVE
    ================================================ */
 @media (max-width: 900px) {
-    .hero-heading {
-        font-size: 48px;
-    }
-
-    .hero-desc {
-        font-size: 17px;
-    }
-
     .features-grid {
         grid-template-columns: 1fr;
+        gap: 16px;
     }
 
     .section-title {
@@ -408,9 +407,20 @@
         min-height: calc(100vh - 80px);
     }
 
+    .stats-bar {
+        padding: 32px 20px;
+    }
+
     .stats-bar-inner {
         flex-direction: column;
-        gap: 28px;
+        gap: 24px;
+        align-items: center;
+        text-align: center;
+    }
+
+    .stat-item {
+        flex-direction: column;
+        gap: 8px;
     }
 
     .stat-divider {
@@ -428,18 +438,23 @@
 }
 
 @media (max-width: 480px) {
-    .hero-heading {
-        font-size: 36px;
-    }
-
     .hero-actions {
         flex-direction: column;
         width: 100%;
+        padding: 0 16px;
     }
 
     .btn-primary,
     .btn-outline {
         justify-content: center;
         width: 100%;
+    }
+
+    .features-section {
+        padding: 60px 20px;
+    }
+
+    .cta-section {
+        padding: 40px 20px 80px;
     }
 }

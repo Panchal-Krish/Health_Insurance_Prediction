@@ -76,7 +76,7 @@
 }
 
 .about-heading {
-    font-size: 52px;
+    font-size: clamp(36px, 6vw, 52px);
     font-weight: 900;
     line-height: 1.1;
     color: #fff;
@@ -191,17 +191,20 @@
 }
 
 .story-card {
-    background: #1a1a1a;
-    border: 1px solid #2a2a2a;
+    background: rgba(26, 26, 26, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 18px;
     padding: 32px 28px;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .story-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(250, 204, 21, 0.2);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    transform: translateY(-6px) scale(1.02);
+    border-color: rgba(250, 204, 21, 0.3);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    background: rgba(31, 31, 31, 0.8);
 }
 
 .story-icon {
@@ -244,16 +247,19 @@
 }
 
 .mentor-card {
-    background: #1a1a1a;
-    border: 1px solid #2a2a2a;
+    background: rgba(26, 26, 26, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 18px;
     padding: 32px 28px;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .mentor-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(250, 204, 21, 0.2);
+    transform: translateY(-6px) scale(1.02);
+    border-color: rgba(250, 204, 21, 0.3);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
 }
 
 .mentor-badge {
@@ -316,13 +322,15 @@
 }
 
 .about-team-card {
-    background: #1a1a1a;
-    border: 1px solid #2a2a2a;
+    background: rgba(26, 26, 26, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 18px;
     padding: 32px 28px;
     opacity: 0;
     transform: translateY(24px);
-    transition: opacity 0.6s ease var(--delay), transform 0.6s ease var(--delay), border-color 0.3s;
+    transition: opacity 0.6s ease var(--delay), transform 0.6s ease var(--delay), border-color 0.3s, box-shadow 0.3s;
 }
 
 .about-team-card.card-visible {
@@ -332,6 +340,8 @@
 
 .about-team-card:hover {
     border-color: var(--card-color);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    transform: translateY(-6px) scale(1.02);
 }
 
 .team-card-header {
@@ -466,8 +476,11 @@
 .about-cta-card {
     max-width: 650px;
     margin: 0 auto;
-    background: #1a1a1a;
-    border: 1px solid #2a2a2a;
+    background: rgba(31, 31, 31, 0.6);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.05);
     border-radius: 24px;
     padding: 60px 40px;
     text-align: center;
@@ -538,18 +551,16 @@
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
-    .about-heading { font-size: 40px; }
-    .about-story-grid { grid-template-columns: 1fr; }
-    .about-team-grid { grid-template-columns: 1fr; }
+    .about-story-grid { grid-template-columns: 1fr; gap: 16px; }
+    .about-team-grid { grid-template-columns: 1fr; gap: 16px; }
     .about-section-title { font-size: 28px; }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .about-hero { 
         padding: 40px 20px; 
         min-height: calc(100vh - 80px);
     }
-    .about-heading { font-size: 32px; }
     .about-hero-stats {
         flex-direction: column;
         gap: 20px;
@@ -560,6 +571,9 @@
         height: 1px;
         margin: 0;
     }
-    .about-mentors-grid { grid-template-columns: 1fr; }
+    .about-mentors-grid { grid-template-columns: 1fr; gap: 16px; }
     .about-cta-card { padding: 48px 24px; }
+    .about-story-section, .about-mentors-section, .about-team-section, .about-tech-section {
+        padding: 40px 20px 60px;
+    }
 }

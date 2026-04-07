@@ -358,7 +358,7 @@
   background: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: 20px;
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
@@ -444,8 +444,15 @@
 /* ACTIONS */
 .actions-cell {
   display: flex;
-  gap: 12px;
-  align-items: center;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+  min-width: 140px;
+}
+
+.actions-row {
+  display: flex;
+  gap: 6px;
 }
 
 .assign-select {

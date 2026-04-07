@@ -28,11 +28,13 @@ input:-webkit-autofill:focus {
     display: flex;
     max-width: 900px;
     width: 100%;
-    background: #1a1a1a;
+    background: rgba(26, 26, 26, 0.6);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     border-radius: 20px;
-    border: 1px solid #2a2a2a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     overflow: hidden;
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 .auth-card-wide {
@@ -130,10 +132,11 @@ input:-webkit-autofill:focus {
 }
 
 .auth-title {
-    font-size: 28px;
+    font-size: clamp(24px, 5vw, 32px);
     font-weight: 800;
     color: #fff;
     margin: 0 0 6px 0;
+    letter-spacing: -0.5px;
 }
 
 .auth-subtitle {
