@@ -245,7 +245,7 @@ Health_Insurance_Prediction/
     └── src/
         ├── App.js                          # Root component & routes
         ├── index.js                        # React entry with AuthProvider
-        ├── context/AuthContext.jsx          # Auth state management
+        ├── context/AuthContext.jsx         # Auth state management
         ├── utils/auth.js                   # Token utils & fetchWithAuth
         ├── components/
         │   ├── Header.jsx                  # Role-aware navbar
@@ -253,13 +253,13 @@ Health_Insurance_Prediction/
         │   └── ProtectedRoute.jsx          # Route guards (3 types)
         ├── pages/
         │   ├── Home.jsx                    # Landing page
-        │   ├── SignIn.jsx / SignUp.jsx      # Authentication
+        │   ├── SignIn.jsx / SignUp.jsx     # Authentication
         │   ├── Dashboard.jsx               # User dashboard
         │   ├── Predict.jsx                 # Premium calculator
         │   ├── HelpDesk.jsx                # Support tickets
         │   ├── Contact.jsx                 # Guest contact form
         │   ├── AdminPanel.jsx              # Admin management
-        │   ├── ManagerDashboard.jsx         # Manager view
+        │   ├── ManagerDashboard.jsx        # Manager view
         │   ├── About.jsx                   # About page
         │   └── Howitworks.jsx              # How it Works
         ├── styles/                         # 14 CSS files (one per component)
