@@ -137,7 +137,7 @@ function SignIn() {
                             </div>
                         </div>
 
-                        <div className="auth-options">
+                        <div className="auth-options" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <label className="auth-checkbox">
                                 <input
                                     type="checkbox"
@@ -147,6 +147,14 @@ function SignIn() {
                                 />
                                 <span>Remember me</span>
                             </label>
+                            <button 
+                                type="button" 
+                                onClick={() => navigate('/forgot-password')}
+                                disabled={loading}
+                                style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontSize: '0.9rem', padding: 0 }}
+                            >
+                                Forgot password?
+                            </button>
                         </div>
 
                         <button type="submit" className="auth-submit" disabled={loading}>

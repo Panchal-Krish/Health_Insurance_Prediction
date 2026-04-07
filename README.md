@@ -76,9 +76,12 @@ The application features a complete **role-based system** with user dashboards, 
 
 ### 🔐 Authentication & Security  
 - JWT-based auth with 24h token expiry
+- **Email verification** on signup (via Brevo)
+- **Password reset** via email link
 - "Remember Me" (localStorage vs sessionStorage)
 - Role-based access control (User / Manager / Admin)
 - Auto-logout on token expiry + cross-tab sync
+- User **Profile page** with account management
 
 </td>
 <td width="50%">
@@ -127,6 +130,8 @@ The application features a complete **role-based system** with user dashboards, 
 | **Werkzeug** | Password hashing (PBKDF2-SHA256) |
 | **pandas / numpy** | Feature engineering & data handling |
 | **python-dotenv** | Environment variable management |
+| **Brevo (Sendinblue)** | Transactional email (verification & reset) |
+| **requests** | HTTP client for Brevo API |
 
 ### Frontend
 | Technology | Purpose |
@@ -141,7 +146,7 @@ The application features a complete **role-based system** with user dashboards, 
 | Technology | Purpose |
 |---|---|
 | **MongoDB** | NoSQL document database |
-| **4 Collections** | `customers`, `prediction_logs`, `support_tickets`, `contacts` |
+| **5 Collections** | `customers`, `prediction_logs`, `support_tickets`, `contacts`, `email_tokens` |
 
 ---
 
@@ -152,8 +157,9 @@ The application features a complete **role-based system** with user dashboards, 
 │                     React Frontend                      │
 │  React 19 · React Router 7 · Lucide · Vanilla CSS       │
 │                                                         │
-│  Pages: Home, SignIn/Up, Dashboard, Predict,            │
-│         HelpDesk, Contact, Admin, Manager, About        │
+│  Pages: Home, SignIn/Up, Dashboard, Predict, Profile,   │
+│         HelpDesk, Contact, Admin, Manager, About,       │
+│         VerifyEmail, ForgotPassword, ResetPassword       │
 └──────────────────────────┬──────────────────────────────┘
                            │ HTTP + JWT (Bearer Token)
                            ▼
@@ -164,8 +170,9 @@ The application features a complete **role-based system** with user dashboards, 
 │  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐    │
 │  │ Auth Routes  │  │ Predict      │  │ Admin/Manager│   │
 │  │ (signup,     │  │ Routes       │  │ Routes       │   │
-│  │  login)      │  │ (ML predict, │  │ (tickets,    │   │
-│  │              │  │  history)    │  │  teams, msgs)│   │
+│  │  login,      │  │ (ML predict, │  │ (tickets,    │   │
+│  │  verify,     │  │  history)    │  │  teams, msgs)│   │
+│  │  reset pwd)  │  │              │  │              │   │
 │  └─────────────┘  └──────┬───────┘  └──────────────┘    │
 │                          │                              │
 │                   ┌──────┴───────┐                      │
@@ -223,14 +230,15 @@ Health_Insurance_Prediction/
 │
 ├── backend/
 │   ├── app.py                              # Flask app factory & entry point
-│   ├── config.py                           # Environment config
+│   ├── config.py                           # Environment config (JWT, Brevo, etc.)
 │   ├── database.py                         # MongoDB connection & collections
+│   ├── email_service.py                    # Brevo transactional email service
 │   ├── ml_service.py                       # ML model loading & prediction
 │   ├── utils.py                            # JWT auth helpers & decorators
 │   ├── requirements.txt                    # Python dependencies
 │   ├── insurance_extra_trees_model.pkl     # Trained model (~49 MB)
 │   └── routes/
-│       ├── auth_routes.py                  # /signup, /login
+│       ├── auth_routes.py                  # /signup, /login, /verify-email, /reset-password
 │       ├── predict_routes.py               # /predict-premium, /my-predictions
 │       ├── ticket_routes.py                # /create-ticket, /my-tickets
 │       ├── contact_routes.py               # /contact
@@ -254,6 +262,10 @@ Health_Insurance_Prediction/
         ├── pages/
         │   ├── Home.jsx                    # Landing page
         │   ├── SignIn.jsx / SignUp.jsx     # Authentication
+        │   ├── VerifyEmail.jsx             # Email verification handler
+        │   ├── ForgotPassword.jsx          # Password reset request
+        │   ├── ResetPassword.jsx           # New password form
+        │   ├── Profile.jsx                 # User profile & account mgmt
         │   ├── Dashboard.jsx               # User dashboard
         │   ├── Predict.jsx                 # Premium calculator
         │   ├── HelpDesk.jsx                # Support tickets
@@ -262,7 +274,8 @@ Health_Insurance_Prediction/
         │   ├── ManagerDashboard.jsx        # Manager view
         │   ├── About.jsx                   # About page
         │   └── Howitworks.jsx              # How it Works
-        ├── styles/                         # 14 CSS files (one per component)
+        ├── styles/                         # 15 CSS files (one per component)
+        │   └── AuthPages.css               # Shared styles for auth flow pages
         └── assets/                         # Logos & images
 ```
 
@@ -362,6 +375,9 @@ Check API health: [http://localhost:5000/health](http://localhost:5000/health)
 SECRET_KEY=your-secret-jwt-key-here
 MONGO_URI=mongodb://localhost:27017/insurance_data
 MODEL_PATH=insurance_extra_trees_model.pkl     # optional, this is the default
+BREVO_API_KEY=xkeysib-your-brevo-api-key       # required for email features
+SENDER_EMAIL=your-verified@email.com           # must match Brevo sender
+FRONTEND_URL=http://localhost:3000             # used in email links
 ```
 
 ### `frontend/.env` (optional)
@@ -380,8 +396,11 @@ REACT_APP_API_URL=http://localhost:5000        # optional, this is the default
 |---|---|---|
 | `GET` | `/health` | API health check |
 | `GET` | `/public-stats` | Home page stats (prediction count, accuracy) |
-| `POST` | `/signup` | Register new user |
-| `POST` | `/login` | Authenticate → returns JWT |
+| `POST` | `/signup` | Register new user (sends verification email) |
+| `POST` | `/login` | Authenticate → returns JWT (requires verified email) |
+| `GET` | `/verify-email/:token` | Verify user's email address |
+| `POST` | `/request-password-reset` | Send password reset email |
+| `POST` | `/reset-password` | Reset password with token |
 | `POST` | `/contact` | Submit contact message |
 
 ### Authenticated (JWT Required)
@@ -452,10 +471,13 @@ User ─── self-service
 |---|---|
 | Password Storage | PBKDF2-SHA256 (Werkzeug) |
 | Authentication | JWT with HS256 signing, 24h expiry |
+| Email Verification | Token-based via Brevo API, 24h expiry with TTL index |
+| Password Reset | Secure token-based reset via email, 1h expiry |
 | Authorization | `@role_required` decorator per route |
 | CORS | Restricted to `localhost:3000` |
 | Input Validation | Client-side (React) + Server-side (Flask) |
 | Token Handling | Auto-expiry check, 401 interception, cross-tab sync |
+| Soft Delete | `is_deleted` flag on user accounts (no hard deletes) |
 
 ---
 

@@ -16,6 +16,10 @@ import AdminPanel from './pages/AdminPanel';
 import ManagerDashboard from './pages/ManagerDashboard';
 import About from './pages/About';
 import HowitWorks from './pages/Howitworks';
+import Profile from './pages/Profile';
+import VerifyEmail from './pages/VerifyEmail';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 
 import './styles/App.css';
@@ -30,6 +34,7 @@ function App() {
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/verify-email/:token" element={<VerifyEmail />} />
 
             {/* Guest Routes (only for non-logged-in users) */}
             <Route
@@ -48,6 +53,9 @@ function App() {
                 </GuestRoute>
               }
             />
+            {/* Accessible to both guests and logged-in users (Profile → Change Password) */}
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
 
             {/* Protected Routes (require login) */}
             <Route
@@ -55,6 +63,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
                 </ProtectedRoute>
               }
             />

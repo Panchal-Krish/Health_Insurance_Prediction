@@ -88,9 +88,14 @@ function Header() {
         {/* Auth links — part of the nav now */}
         <span className="nav-divider" />
         {isLoggedIn ? (
-          <button className="nav-auth-btn nav-logout" onClick={handleLogout}>
-            Logout
-          </button>
+          <>
+            <NavLink to="/profile" className={({ isActive }) => `nav-auth-link ${isActive ? 'active' : ''}`} onClick={closeMobileMenu}>
+              Profile
+            </NavLink>
+            <button className="nav-auth-btn nav-logout" onClick={handleLogout}>
+              Logout
+            </button>
+          </>
         ) : (
           <NavLink to="/signin" className={({ isActive }) => `nav-auth-link ${isActive ? 'active' : ''}`} onClick={closeMobileMenu}>
             Sign In / Sign Up

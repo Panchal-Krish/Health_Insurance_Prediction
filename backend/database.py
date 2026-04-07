@@ -12,11 +12,13 @@ try:
     prediction_logs     = db["prediction_logs"]
     tickets_collection  = db["support_tickets"]
     contacts_collection = db["contacts"]
+    email_tokens_collection = db["email_tokens"]
 
     users_collection.create_index("email", unique=True)
     prediction_logs.create_index("user_id")
     tickets_collection.create_index("user_id")
     contacts_collection.create_index("created_at")
+    email_tokens_collection.create_index("expires_at", expireAfterSeconds=0)
 
     print("Database connected successfully")
 except Exception as e:

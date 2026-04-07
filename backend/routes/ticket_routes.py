@@ -45,7 +45,8 @@ def create_ticket():
             "assigned_role":    None,
             "admin_response":   "",
             "manager_response": "",
-            "created_at":       datetime.now(timezone.utc)
+            "created_at":       datetime.now(timezone.utc),
+            "updated_at":       datetime.now(timezone.utc)
         }
 
         tickets_collection.insert_one(ticket)
@@ -67,6 +68,8 @@ def get_user_tickets():
         )
         for ticket in tickets:
             ticket["created_at"] = ticket["created_at"].isoformat()
+            if "updated_at" in ticket:
+                ticket["updated_at"] = ticket["updated_at"].isoformat()
         return jsonify(tickets), 200
     except Exception as e:
         print(f"Get tickets error: {e}")

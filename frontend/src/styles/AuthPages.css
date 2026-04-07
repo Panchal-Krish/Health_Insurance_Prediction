@@ -1,0 +1,267 @@
+/* AuthPages.css — Styles for VerifyEmail, ForgotPassword, ResetPassword, Profile */
+/* Extends the base auth design system from SignIn.css */
+@import './SignIn.css';
+
+/* ===== COMPACT CARD (single-panel, no branding sidebar) ===== */
+.auth-card-compact {
+    max-width: 440px;
+    margin: 0 auto;
+    flex-direction: column;
+}
+
+.auth-card-profile {
+    max-width: 600px;
+    margin: 0 auto;
+    flex-direction: column;
+}
+
+/* ===== FULL-WIDTH PANEL (no branding sidebar) ===== */
+.auth-full-panel {
+    width: 100%;
+}
+
+.auth-centered-panel {
+    width: 100%;
+    align-items: center;
+    text-align: center;
+    padding: 48px 40px;
+}
+
+/* Push page content down when we need clearance from header */
+.auth-page-top {
+    padding-top: 100px;
+    align-items: flex-start;
+}
+
+/* ===== PAGE ICON (branding icon at top of compact pages) ===== */
+.auth-page-icon {
+    width: 56px;
+    height: 56px;
+    background: #facc15;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    color: #000;
+    box-shadow: 0 4px 20px rgba(250, 204, 21, 0.25);
+}
+
+/* ===== STATUS BLOCK (Verify, Success, Error states) ===== */
+.auth-status-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.auth-status-block .auth-title {
+    margin-top: 0;
+}
+
+.auth-status-block .auth-subtitle {
+    margin-bottom: 2rem;
+}
+
+.auth-status-icon {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.auth-status-loading {
+    color: #facc15;
+}
+
+.auth-status-success {
+    color: #10b981;
+}
+
+.auth-status-error {
+    color: #ef4444;
+}
+
+.auth-status-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+/* ===== BUTTON VARIANTS ===== */
+.auth-btn-outline {
+    background: transparent !important;
+    border: 1px solid #facc15 !important;
+    color: #facc15 !important;
+    box-shadow: none !important;
+}
+
+.auth-btn-outline:hover:not(:disabled) {
+    background: rgba(250, 204, 21, 0.08) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(250, 204, 21, 0.15) !important;
+}
+
+.auth-btn-auto {
+    width: auto !important;
+    padding: 0.75rem 1.5rem !important;
+}
+
+.auth-text-error {
+    color: #ef4444 !important;
+}
+
+/* ===== BACK LINK ===== */
+.auth-back-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 auto;
+}
+
+/* ===== SPINNER ICON (for Loader from lucide) ===== */
+.auth-spin-icon {
+    animation: auth-spin 1s linear infinite;
+}
+
+/* ===== PROFILE STYLES ===== */
+
+/* Profile Header */
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 32px 40px;
+    border-bottom: 1px solid #2a2a2a;
+    background: linear-gradient(160deg, #1f1f1f 0%, #1a1a0f 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-header::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 160px;
+    height: 160px;
+    background: radial-gradient(circle, rgba(250, 204, 21, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.profile-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: #facc15;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 800;
+    flex-shrink: 0;
+    box-shadow: 0 4px 20px rgba(250, 204, 21, 0.25);
+    position: relative;
+    z-index: 1;
+}
+
+.profile-header-info {
+    position: relative;
+    z-index: 1;
+}
+
+.profile-header-info .auth-title {
+    margin: 0;
+    text-align: left;
+}
+
+.profile-header-info .auth-subtitle {
+    text-align: left;
+    margin: 6px 0 0 0;
+}
+
+/* Profile Section */
+.profile-section {
+    margin-bottom: 0;
+}
+
+.profile-section-bordered {
+    border-top: 1px solid #2a2a2a;
+    padding-top: 2rem;
+    margin-top: 2rem;
+}
+
+.profile-section-title {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 1.25rem 0;
+}
+
+.profile-fields {
+    display: grid;
+    gap: 1.25rem;
+}
+
+/* Disabled field styling */
+.field-input-disabled {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.field-input-disabled input {
+    color: #9ca3af !important;
+    cursor: not-allowed;
+}
+
+/* Security section */
+.profile-security-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+}
+
+.profile-security-header .profile-section-title {
+    margin: 0;
+}
+
+.profile-security-icon {
+    color: #facc15;
+}
+
+.profile-security-desc {
+    color: #9ca3af;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0 0 1.5rem 0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+    .auth-card-compact {
+        max-width: 100%;
+    }
+
+    .auth-card-profile {
+        max-width: 100%;
+    }
+
+    .auth-centered-panel {
+        padding: 32px 20px;
+    }
+
+    .profile-header {
+        padding: 24px 20px;
+        gap: 16px;
+    }
+
+    .profile-avatar {
+        width: 52px;
+        height: 52px;
+        font-size: 22px;
+    }
+
+    .auth-page-top {
+        padding-top: 80px;
+    }
+}

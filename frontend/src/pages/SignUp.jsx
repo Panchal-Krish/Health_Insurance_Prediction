@@ -102,9 +102,7 @@ function SignUp() {
 
             if (response.ok) {
                 setSuccess(true);
-                redirectTimerRef.current = setTimeout(() => {
-                    navigate('/signin');
-                }, 2000);
+                // Do not redirect automatically so they can read the message
             } else {
                 setError(data.message || 'Signup failed');
             }
@@ -157,9 +155,9 @@ function SignUp() {
                     )}
 
                     {success && (
-                        <div className="auth-success">
-                            <CheckCircle size={16} />
-                            <span>Account created! Redirecting to sign in...</span>
+                        <div className="auth-success" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '1rem', borderRadius: '8px', display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                            <CheckCircle size={20} style={{ flexShrink: 0, marginTop: '2px' }} />
+                            <span><strong>Account created successfully!</strong><br />A verification link has been sent to your email address. Please verify your email before logging in.</span>
                         </div>
                     )}
 
@@ -284,7 +282,7 @@ function SignUp() {
                             {loading ? (
                                 <><span className="auth-spinner" />Creating Account...</>
                             ) : success ? (
-                                <><CheckCircle size={18} /> Success!</>
+                                <><CheckCircle size={18} /> Success! Check Email.</>
                             ) : (
                                 <>Create Account <ArrowRight size={18} /></>
                             )}

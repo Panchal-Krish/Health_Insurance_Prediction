@@ -53,6 +53,9 @@ This project is a **full-stack web application** that predicts health insurance 
 |---|---|
 | **ML-Powered Predictions** | Uses an ExtraTreesRegressor model (800 estimators) trained on real insurance data with an R² of 81.2% |
 | **User Accounts** | Full signup/login system with JWT-based authentication and "Remember Me" persistence |
+| **Email Verification** | Signup triggers a Brevo transactional email with a 24h verification link; unverified users cannot log in |
+| **Password Reset** | Forgot Password flow sends a 1h reset link via Brevo; users set a new password securely |
+| **User Profile** | Authenticated users can view their account info and trigger a password change from the Profile page |
 | **Role-Based Access** | Three distinct roles — `user`, `manager`, `admin` — each with their own dashboard and permissions |
 | **Prediction History** | Every prediction is logged and displayed on the user's dashboard with pagination |
 | **Self/Other Predictions** | Users can predict premiums for themselves or for a named beneficiary |
@@ -139,6 +142,8 @@ This project is a **full-stack web application** that predicts health insurance 
 | ML Model Loading | joblib | 1.5.3 |
 | ML Libraries | scikit-learn, pandas, numpy | 1.8.0, 2.3.3, 2.4.1 |
 | Env Variables | python-dotenv | 1.2.2 |
+| Email Service | Brevo (Sendinblue) API v3 | — |
+| HTTP Client | requests | 2.32+ |
 | Algorithm | ExtraTreesRegressor (scikit-learn) | — |
 
 ### Frontend
@@ -172,8 +177,9 @@ Health_Insurance_Prediction/
 │
 ├── backend/
 │   ├── app.py                          # Flask app factory & entry point
-│   ├── config.py                       # Config class (env vars)
+│   ├── config.py                       # Config class (env vars: JWT, Brevo, etc.)
 │   ├── database.py                     # MongoDB connection & collection setup
+│   ├── email_service.py                # Brevo transactional email service
 │   ├── ml_service.py                   # ML model loading & prediction logic
 │   ├── utils.py                        # JWT helpers & auth decorators
 │   ├── requirements.txt                # Python dependencies
@@ -181,7 +187,7 @@ Health_Insurance_Prediction/
 │   │
 │   └── routes/
 │       ├── __init__.py                 # Package marker
-│       ├── auth_routes.py              # POST /signup, POST /login
+│       ├── auth_routes.py              # POST /signup, POST /login, GET /verify-email, POST /reset-password
 │       ├── predict_routes.py           # POST /predict-premium, GET /premium-history, GET /my-predictions
 │       ├── ticket_routes.py            # POST /create-ticket, GET /my-tickets
 │       ├── contact_routes.py           # POST /contact
@@ -228,8 +234,12 @@ Health_Insurance_Prediction/
         │
         ├── pages/
         │   ├── Home.jsx                # Landing page (hero, stats, features, CTA)
-        │   ├── SignIn.jsx              # Login form with "Remember Me"
+        │   ├── SignIn.jsx              # Login form with "Remember Me" & Forgot Password
         │   ├── SignUp.jsx              # Registration form with validations
+        │   ├── VerifyEmail.jsx         # Email verification handler (token from URL)
+        │   ├── ForgotPassword.jsx      # Password reset request form
+        │   ├── ResetPassword.jsx       # New password form (token from URL)
+        │   ├── Profile.jsx             # User profile & account management
         │   ├── Dashboard.jsx           # User dashboard (latest prediction, timeline, pagination)
         │   ├── Predict.jsx             # Premium calculator form (self/other)
         │   ├── HelpDesk.jsx            # Create & view support tickets
@@ -244,6 +254,7 @@ Health_Insurance_Prediction/
             ├── Home.css                # Home page: hero, stats bar, features, CTA
             ├── SignIn.css              # Auth pages (shared by SignIn & SignUp)
             ├── SignUp.css              # SignUp-specific overrides
+            ├── AuthPages.css           # Verify, Forgot/Reset Password, Profile pages
             ├── Dashboard.css           # User dashboard: hero card, stats grid, timeline
             ├── Predict.css             # Premium calculator form styles
             ├── HelpDesk.css            # Help desk: form, ticket cards
@@ -315,9 +326,12 @@ class Config:
     JWT_EXPIRATION_HOURS = 24                              # Token validity
     MONGO_URI          = os.getenv('MONGO_URI')            # MongoDB connection string
     MODEL_PATH         = os.getenv('MODEL_PATH', 'insurance_extra_trees_model.pkl')
+    BREVO_API_KEY      = os.getenv('BREVO_API_KEY')        # Brevo email service key
+    FRONTEND_URL       = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+    SENDER_EMAIL       = os.getenv('SENDER_EMAIL')         # Verified Brevo sender
 ```
 
-All sensitive values are loaded from a `.env` file via `python-dotenv`. The `.env` file is git-ignored.
+All sensitive values are loaded from a `.env` file via `python-dotenv`. The `.env` file is git-ignored. The config also loads from the parent directory if not found locally.
 
 ---
 
@@ -327,16 +341,18 @@ This module runs **at import time** and performs:
 
 1. **Connection**: Creates a `MongoClient` using `MONGO_URI`.
 2. **Database selection**: Uses the `insurance_data` database.
-3. **Collection binding**: Exposes 4 collection handles as module-level variables:
+3. **Collection binding**: Exposes 5 collection handles as module-level variables:
    - `users_collection` → `customers`
    - `prediction_logs` → `prediction_logs`
    - `tickets_collection` → `support_tickets`
    - `contacts_collection` → `contacts`
+   - `email_tokens_collection` → `email_tokens`
 4. **Index creation**: Creates indexes for performance:
    - `customers.email` — unique index (prevents duplicate accounts)
    - `prediction_logs.user_id` — for fast per-user lookups
    - `support_tickets.user_id` — for fast per-user ticket retrieval
    - `contacts.created_at` — for chronological sorting
+   - `email_tokens.expires_at` — **TTL index** (auto-deletes expired tokens)
 5. **Fail-fast**: If `MONGO_URI` is not set or the connection fails, the process exits with `sys.exit(1)`.
 
 ---
@@ -436,8 +452,11 @@ Where `bmi_penalty` ranges from $0 (normal) to $3000 (obese) and `region_penalty
 
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| `POST` | `/signup` | ❌ No | Register a new user account |
-| `POST` | `/login` | ❌ No | Authenticate and receive JWT |
+| `POST` | `/signup` | ❌ No | Register a new user account (sends verification email) |
+| `POST` | `/login` | ❌ No | Authenticate and receive JWT (requires verified email) |
+| `GET` | `/verify-email/:token` | ❌ No | Verify email address using token from email link |
+| `POST` | `/request-password-reset` | ❌ No | Send password reset email |
+| `POST` | `/reset-password` | ❌ No | Reset password using token from email link |
 
 **`POST /signup`** — Request body:
 ```json
@@ -449,7 +468,8 @@ Where `bmi_penalty` ranges from $0 (normal) to $3000 (obese) and `region_penalty
 ```
 - Validates: name ≥ 2 chars, password ≥ 6 chars, email not already registered
 - Password is hashed with `werkzeug.security.generate_password_hash()`
-- New users always get `role: "user"`
+- New users get `role: "user"`, `is_verified: false`, `is_deleted: false`
+- A verification token is created in `email_tokens` (24h TTL) and emailed via Brevo
 
 **`POST /login`** — Request body:
 ```json
@@ -459,7 +479,26 @@ Where `bmi_penalty` ranges from $0 (normal) to $3000 (obese) and `region_penalty
 }
 ```
 - Returns: `{ token, email, role, fullName }`
-- On success, the client stores the JWT and user metadata
+- **Blocks unverified users** with HTTP 403
+- Filters out soft-deleted accounts (`is_deleted: true`)
+
+**`GET /verify-email/:token`** — No body required:
+- Validates the token against `email_tokens` collection
+- Sets `is_verified: true` on the user's account
+- Deletes the used token
+
+**`POST /request-password-reset`** — Request body:
+```json
+{ "email": "john@example.com" }
+```
+- Always returns 200 (prevents email enumeration)
+- If user exists: creates a reset token (1h TTL) and sends email via Brevo
+
+**`POST /reset-password`** — Request body:
+```json
+{ "token": "abc123...", "password": "newSecurePass" }
+```
+- Validates token, hashes new password, updates user, deletes token
 
 ---
 
@@ -611,6 +650,8 @@ Stores all user accounts (regular users, managers, admins).
     "email": "john@example.com",          // unique index
     "password": "pbkdf2:sha256:...",       // Werkzeug hashed
     "role": "user",                        // "user" | "manager" | "admin"
+    "is_verified": true,                   // email verification status
+    "is_deleted": false,                   // soft-delete flag
     "created_at": ISODate("2026-04-01T10:00:00Z")
 }
 ```
@@ -656,7 +697,8 @@ Stores support tickets created by users.
     "assigned_role": null,                 // "manager" or null
     "admin_response": "",                  // admin's written response
     "manager_response": "",                // manager's written response
-    "created_at": ISODate("2026-04-01T10:00:00Z")
+    "created_at": ISODate("2026-04-01T10:00:00Z"),
+    "updated_at": ISODate("2026-04-01T10:00:00Z")
 }
 ```
 
@@ -676,6 +718,20 @@ Stores contact form submissions from unauthenticated users.
 }
 ```
 
+#### Collection: `email_tokens`
+
+Stores email verification and password reset tokens. Has a **TTL index** on `expires_at` for automatic cleanup.
+
+```json
+{
+    "_id": ObjectId("..."),
+    "email": "john@example.com",
+    "token": "a1b2c3d4e5f6...",            // UUID hex string
+    "type": "verify",                      // "verify" | "reset"
+    "expires_at": ISODate("2026-04-08T10:00:00Z")  // TTL-indexed
+}
+```
+
 ### Indexes
 
 | Collection | Field | Type | Purpose |
@@ -684,6 +740,7 @@ Stores contact form submissions from unauthenticated users.
 | `prediction_logs` | `user_id` | Standard | Fast per-user queries |
 | `support_tickets` | `user_id` | Standard | Fast per-user queries |
 | `contacts` | `created_at` | Standard | Chronological sorting |
+| `email_tokens` | `expires_at` | **TTL** | Auto-delete expired tokens |
 
 ---
 
@@ -775,7 +832,12 @@ The React tree structure:
           /* Guest Only */   /signin      → GuestRoute → SignIn
                              /signup      → GuestRoute → SignUp
 
+          /* Public Auth */   /verify-email/:token → VerifyEmail
+                              /forgot-password     → ForgotPassword
+                              /reset-password/:token → ResetPassword
+
           /* Auth Required */  /dashboard   → ProtectedRoute → Dashboard
+                               /profile     → ProtectedRoute → Profile
                                /predict     → ProtectedRoute → Predict
                                /helpdesk    → ProtectedRoute → HelpDesk
 
@@ -852,9 +914,9 @@ Three guard components:
 - Displays the logo + branding ("Insurance Predictor")
 - Shows different navigation links based on:
   - **Not logged in**: Home, Contact Us, How it Works, About us, Sign In / Sign Up
-  - **Logged in (user)**: Dashboard, Help Desk, How it Works, About us, Logout
-  - **Logged in (admin)**: Admin Panel, Logout
-  - **Logged in (manager)**: Manager Panel, Logout
+  - **Logged in (user)**: Dashboard, Help Desk, How it Works, About us, Profile, Logout
+  - **Logged in (admin)**: Admin Panel, Profile, Logout
+  - **Logged in (manager)**: Manager Panel, Profile, Logout
 - Mobile-responsive: hamburger menu with slide-in overlay
 - Active route highlighting via React Router's `NavLink`
 
@@ -895,7 +957,9 @@ Features:
 - Split layout: left branding panel + right form panel
 - Email + password fields with show/hide toggle
 - "Remember Me" checkbox (localStorage vs sessionStorage)
+- **"Forgot password?"** link → navigates to `/forgot-password`
 - Post-login routing: admin → `/admin`, manager → `/manager`, user → `/dashboard`
+- **Blocks unverified users** with a 403 error message
 - Error display for invalid credentials or server issues
 
 ---
@@ -908,7 +972,54 @@ Features:
 Features:
 - Full name, email, password, confirm password fields
 - Client-side validation before API call
-- Success → auto-redirect to `/signin`
+- Success → displays "Check your email" message (no auto-redirect)
+- Sends verification email via Brevo on successful registration
+
+---
+
+#### ✉️ VerifyEmail (`VerifyEmail.jsx`)
+
+**URL:** `/verify-email/:token`  
+**Auth:** Public
+
+- Automatically calls the backend verification endpoint on page load
+- Uses a `useRef` guard to prevent React Strict Mode double-calls
+- Three states: Verifying (spinner), Success (green checkmark + "Continue to Sign In"), Error (red X + "Back to Sign Up")
+
+---
+
+#### 🔑 ForgotPassword (`ForgotPassword.jsx`)
+
+**URL:** `/forgot-password`  
+**Auth:** Public (accessible to both guests and logged-in users)
+
+- Email input form (auto-filled if user is logged in from Profile page)
+- Calls `POST /request-password-reset`
+- Success state shows "Check your email" message
+- "Back to Sign In" / "Back to Profile" depending on auth state
+
+---
+
+#### 🔐 ResetPassword (`ResetPassword.jsx`)
+
+**URL:** `/reset-password/:token`  
+**Auth:** Public
+
+- New password + confirm password fields with show/hide toggle
+- Client-side validation (min 6 chars, match)
+- Calls `POST /reset-password` with token and new password
+- Success → auto-redirect to `/signin` after 3 seconds
+
+---
+
+#### 👤 Profile (`Profile.jsx`)
+
+**URL:** `/profile`  
+**Auth:** Logged-in users only
+
+- Displays user avatar (first letter of name), full name, email, and role
+- "Security" section with a "Change Password" button → navigates to `/forgot-password`
+- Uses the shared `AuthPages.css` design system
 
 ---
 
@@ -1236,9 +1347,12 @@ Create a `.env` file in the `backend/` directory:
 # Required
 SECRET_KEY=your-jwt-secret-key-here
 MONGO_URI=mongodb://localhost:27017/insurance_data
+BREVO_API_KEY=xkeysib-your-brevo-api-key
+SENDER_EMAIL=your-verified@email.com
 
 # Optional
 MODEL_PATH=insurance_extra_trees_model.pkl
+FRONTEND_URL=http://localhost:3000
 ```
 
 Create a `.env` file in the `frontend/` directory (optional):
@@ -1369,8 +1483,11 @@ The React dev server starts on `http://localhost:3000` and proxies API calls to 
 |---|---|---|---|---|
 | `GET` | `/health` | ❌ | — | Health check |
 | `GET` | `/public-stats` | ❌ | — | Home page stats |
-| `POST` | `/signup` | ❌ | — | Register user |
-| `POST` | `/login` | ❌ | — | Login (returns JWT) |
+| `POST` | `/signup` | ❌ | — | Register user (sends verification email) |
+| `POST` | `/login` | ❌ | — | Login (requires verified email, returns JWT) |
+| `GET` | `/verify-email/:token` | ❌ | — | Verify email address |
+| `POST` | `/request-password-reset` | ❌ | — | Send password reset email |
+| `POST` | `/reset-password` | ❌ | — | Reset password with token |
 | `POST` | `/contact` | ❌ | — | Submit contact message |
 | `POST` | `/predict-premium` | ✅ | any | Calculate premium |
 | `GET` | `/premium-history` | ✅ | any | Latest prediction |
@@ -1395,6 +1512,9 @@ The React dev server starts on `http://localhost:3000` and proxies API calls to 
 |---|---|
 | **Password Storage** | Werkzeug PBKDF2-SHA256 hash (never stored in plaintext) |
 | **Authentication** | JWT tokens with HS256 signing and 24-hour expiry |
+| **Email Verification** | Token-based verification via Brevo API; 24h TTL with MongoDB auto-cleanup |
+| **Password Reset** | Secure token-based reset via email; 1h TTL; prevents email enumeration (always returns 200) |
+| **Soft Delete** | `is_deleted` flag on user accounts prevents hard data loss |
 | **Token Storage** | localStorage (persistent) or sessionStorage (session-only) based on "Remember Me" |
 | **Token Validation** | Both client-side (expiry check before request) and server-side (decode + verify) |
 | **CORS** | Restricted to `localhost:3000` origins only |
@@ -1422,8 +1542,6 @@ The React dev server starts on `http://localhost:3000` and proxies API calls to 
 
 | Limitation | Details |
 |---|---|
-| **No password reset** | Users cannot reset forgotten passwords |
-| **No email verification** | Signup does not verify email ownership |
 | **No admin creation UI** | Admin accounts must be created directly in MongoDB |
 | **Static model accuracy** | The 81.2% value is hardcoded, not dynamically computed |
 | **No model retraining** | The ML model is a static `.pkl` file with no retraining pipeline |
@@ -1435,8 +1553,6 @@ The React dev server starts on `http://localhost:3000` and proxies API calls to 
 
 ### Future Scope
 
-- **Password reset via email** (OTP or magic link)
-- **Email verification** on signup
 - **Two-factor authentication** (2FA)
 - **Model retraining pipeline** with new data
 - **Multiple ML models** (compare Random Forest, XGBoost, Neural Network)
@@ -1466,4 +1582,4 @@ A development utility to wipe specific MongoDB collections:
 ---
 
 *Documentation generated on April 7, 2026.*  
-*Last updated: v1.0*
+*Last updated: v1.1 — Added Email Verification, Password Reset, User Profile, Brevo Integration*

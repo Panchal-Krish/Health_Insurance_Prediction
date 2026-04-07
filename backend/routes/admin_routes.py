@@ -33,7 +33,11 @@ def assign_ticket():
 
         result = tickets_collection.update_one(
             {"ticket_id": data["ticket_id"]},
-            {"$set": {"assigned_to": data["assigned_to"], "assigned_role": data["assigned_role"]}}
+            {"$set": {
+                "assigned_to": data["assigned_to"], 
+                "assigned_role": data["assigned_role"],
+                "updated_at": datetime.now(timezone.utc)
+            }}
         )
         if result.matched_count == 0:
             return jsonify({"message": "Ticket not found"}), 404
@@ -61,6 +65,8 @@ def admin_update_ticket(ticket_id):
 
         if not update_fields:
             return jsonify({"message": "No fields to update"}), 400
+
+        update_fields["updated_at"] = datetime.now(timezone.utc)
 
         result = tickets_collection.update_one({"ticket_id": ticket_id}, {"$set": update_fields})
         if result.matched_count == 0:
@@ -96,6 +102,8 @@ def create_manager():
             "email":      email,
             "password":   generate_password_hash(password),
             "role":       "manager",
+            "is_verified": True,
+            "is_deleted": False,
             "created_at": datetime.now(timezone.utc)
         })
         return jsonify({"message": "Manager account created"}), 201

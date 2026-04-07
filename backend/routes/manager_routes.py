@@ -48,6 +48,8 @@ def manager_update_ticket(ticket_id):
         if not update_fields:
             return jsonify({"message": "No fields to update"}), 400
 
+        update_fields["updated_at"] = datetime.now(timezone.utc)
+
         result = tickets_collection.update_one({"ticket_id": ticket_id}, {"$set": update_fields})
         if result.matched_count == 0:
             return jsonify({"message": "Ticket not found"}), 404
