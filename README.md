@@ -149,37 +149,37 @@ The application features a complete **role-based system** with user dashboards, 
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    React Frontend                        │
-│  React 19 · React Router 7 · Lucide · Vanilla CSS       │
+│                     React Frontend                      │
+│  React 19 · React Router 7 · Lucide · Vanilla CSS      │
 │                                                         │
 │  Pages: Home, SignIn/Up, Dashboard, Predict,            │
 │         HelpDesk, Contact, Admin, Manager, About        │
-└───────────────────────┬─────────────────────────────────┘
-                        │ HTTP + JWT (Bearer Token)
-                        ▼
+└──────────────────────────┬──────────────────────────────┘
+                           │ HTTP + JWT (Bearer Token)
+                           ▼
 ┌─────────────────────────────────────────────────────────┐
-│                     Flask Backend                        │
-│  7 Blueprint Routes · JWT Auth · CORS · Validation      │
+│                     Flask Backend                       │
+│  7 Blueprint Routes · JWT Auth · CORS · Validation     │
 │                                                         │
-│  ┌─────────────┐  ┌──────────────┐  ┌───────────────┐  │
-│  │ Auth Routes  │  │ Predict      │  │ Admin/Manager │  │
-│  │ (signup,     │  │ Routes       │  │ Routes        │  │
-│  │  login)      │  │ (ML predict, │  │ (tickets,     │  │
-│  │              │  │  history)    │  │  teams, msgs) │  │
-│  └─────────────┘  └──────┬───────┘  └───────────────┘  │
-│                          │                               │
-│                   ┌──────┴───────┐                       │
-│                   │  ML Service  │ ← ExtraTrees .pkl     │
-│                   │  (14 feats)  │   (~49 MB)            │
-│                   └──────────────┘                       │
-└───────────────────────┬─────────────────────────────────┘
-                        │ PyMongo
-                        ▼
+│  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │ Auth Routes  │  │ Predict      │  │ Admin/Manager│  │
+│  │ (signup,     │  │ Routes       │  │ Routes       │  │
+│  │  login)      │  │ (ML predict, │  │ (tickets,    │  │
+│  │              │  │  history)    │  │  teams, msgs)│  │
+│  └─────────────┘  └──────┬───────┘  └──────────────┘  │
+│                          │                              │
+│                   ┌──────┴───────┐                      │
+│                   │  ML Service  │ ← ExtraTrees .pkl    │
+│                   │  (14 feats)  │   (~49 MB)           │
+│                   └──────────────┘                      │
+└──────────────────────────┬──────────────────────────────┘
+                           │ PyMongo
+                           ▼
 ┌─────────────────────────────────────────────────────────┐
-│                      MongoDB                             │
-│  Database: insurance_data                                │
-│  Collections: customers · prediction_logs ·              │
-│               support_tickets · contacts                 │
+│                       MongoDB                           │
+│  Database: insurance_data                               │
+│  Collections: customers · prediction_logs ·             │
+│               support_tickets · contacts                │
 └─────────────────────────────────────────────────────────┘
 ```
 
