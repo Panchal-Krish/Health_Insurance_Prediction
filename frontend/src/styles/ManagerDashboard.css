@@ -124,14 +124,14 @@
 .icon-resolved { background: rgba(16, 185, 129, 0.1); color: var(--accent-success); }
 .icon-messages { background: rgba(245, 158, 11, 0.1); color: var(--accent-warning); }
 
-.stat-value {
+.manager-page .stat-value {
   font-size: 36px;
   font-weight: 800;
   color: var(--text-primary);
   line-height: 1;
 }
 
-.stat-label {
+.manager-page .stat-label {
   font-size: 14px;
   font-weight: 600;
   color: var(--text-secondary);
@@ -358,135 +358,175 @@
   background: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: 20px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: visible;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  -webkit-overflow-scrolling: touch;
 }
 
 .ticket-table {
   width: 100%;
+  min-width: 1020px;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
+/* Fixed column widths */
+.ticket-table colgroup col:nth-child(1) { width: 90px; }   /* ID */
+.ticket-table colgroup col:nth-child(2) { width: 150px; }  /* User */
+.ticket-table colgroup col:nth-child(3) { width: 180px; }  /* Subject */
+.ticket-table colgroup col:nth-child(4) { width: 110px; }  /* Category */
+.ticket-table colgroup col:nth-child(5) { width: 100px; }  /* Priority */
+.ticket-table colgroup col:nth-child(6) { width: 120px; }  /* Status */
+.ticket-table colgroup col:nth-child(7) { width: 100px; }  /* Created */
+.ticket-table colgroup col:nth-child(8) { width: 170px; }  /* Actions */
+
 .ticket-table thead {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.03);
   border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .ticket-table th {
-  padding: 20px 24px;
+  padding: 14px 16px;
   text-align: left;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: #6b7280;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
 }
 
 .ticket-table tbody tr {
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   transition: background-color 0.2s;
 }
 
+.ticket-table tbody tr:last-child {
+  border-bottom: none;
+}
+
 .ticket-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .ticket-table td {
-  padding: 20px 24px;
-  font-size: 15px;
+  padding: 14px 16px;
+  font-size: 14px;
   color: var(--text-primary);
   vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ticket-id-cell {
   font-family: monospace;
   font-weight: 700;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 13px;
 }
 
-.subject-cell {
-  font-weight: 600;
-  max-width: 250px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+.subject-cell { font-weight: 600; }
+.date-cell { font-size: 13px; color: var(--text-secondary); }
 
 .notes-cell {
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-secondary);
 }
 
 /* BADGES */
 .priority-badge, .status-badge {
   display: inline-block;
-  padding: 6px 12px;
+  padding: 4px 10px;
   border-radius: 99px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
+  vertical-align: middle;
 }
 
-.priority-badge.low { background: rgba(16, 185, 129, 0.1); color: var(--accent-success); }
-.priority-badge.medium { background: rgba(245, 158, 11, 0.1); color: var(--accent-warning); }
-.priority-badge.high { background: rgba(239, 68, 68, 0.1); color: var(--accent-danger); }
+.priority-badge.low    { background: rgba(16,185,129,0.12); color: var(--accent-success); border: 1px solid rgba(16,185,129,0.2);  }
+.priority-badge.medium { background: rgba(245,158,11,0.12); color: var(--accent-warning); border: 1px solid rgba(245,158,11,0.2);  }
+.priority-badge.high   { background: rgba(239,68,68,0.12);  color: var(--accent-danger);  border: 1px solid rgba(239,68,68,0.2);   }
 
-.status-badge.open { background: rgba(250, 204, 21, 0.1); color: var(--accent-primary); }
-.status-badge.in-progress { background: rgba(139, 92, 246, 0.1); color: #a78bfa; }
-.status-badge.resolved, .status-badge.closed { background: rgba(16, 185, 129, 0.1); color: var(--accent-success); }
-.status-badge.waiting-admin { background: rgba(239, 68, 68, 0.1); color: var(--accent-danger); }
+.status-badge.open          { background: rgba(250,204,21,0.12);  color: var(--accent-primary); border: 1px solid rgba(250,204,21,0.25); }
+.status-badge.in-progress   { background: rgba(139,92,246,0.12);  color: #a78bfa;               border: 1px solid rgba(139,92,246,0.25); }
+.status-badge.resolved,
+.status-badge.closed        { background: rgba(16,185,129,0.12);  color: var(--accent-success); border: 1px solid rgba(16,185,129,0.2);  }
+.status-badge.waiting-admin { background: rgba(239,68,68,0.12);   color: var(--accent-danger);  border: 1px solid rgba(239,68,68,0.2);   }
 
-/* ACTIONS */
+/* ACTIONS CELL — inner div handles layout, not the td */
 .actions-cell {
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: visible !important;
+}
+
+.actions-inner {
   display: flex;
-  gap: 12px;
+  gap: 6px;
   align-items: center;
 }
 
-.assign-select {
-  padding: 8px 12px;
-  background: #121212;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  color: var(--text-primary);
-  font-size: 13px;
-  font-weight: 500;
-  outline: none;
-}
-.assign-select:focus { border-color: var(--accent-primary); }
-
 .action-btn {
-  padding: 8px 16px;
+  padding: 7px 12px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  text-align: center;
 }
 
 .action-btn:hover:not(:disabled) {
-  background: var(--surface);
-  border-color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Start Work / Update */
+.action-btn.start {
+  background: rgba(139, 92, 246, 0.1);
+  color: #a78bfa;
+  border-color: rgba(139, 92, 246, 0.25);
+}
+.action-btn.start:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+/* Resolve / Escalate */
+.action-btn.resolve {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--accent-success);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+.action-btn.resolve:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.5);
 }
 
 .action-btn.assign {
   background: rgba(250, 204, 21, 0.1);
   color: var(--accent-primary);
-  border-color: rgba(250, 204, 21, 0.2);
+  border-color: rgba(250, 204, 21, 0.25);
 }
-
 .action-btn.assign:hover:not(:disabled) {
   background: var(--accent-primary);
   color: #000;
+  border-color: var(--accent-primary);
+}
+
+.action-btn.small {
+  padding: 5px 10px;
+  font-size: 12px;
 }
 
 .action-btn:disabled {
@@ -667,7 +707,7 @@
 .form-group input, .form-group select, .form-group textarea {
   width: 100%;
   padding: 14px 16px;
-  background: #121212;
+  background-color: #121212;
   border: 1px solid var(--border-color);
   border-radius: 12px;
   color: var(--text-primary);
@@ -720,4 +760,30 @@
   .table-container { overflow-x: auto; }
   .ticket-table { min-width: 1000px; }
   .message-header { flex-direction: column; gap: 16px; }
+}
+
+/* ==================== MANAGER MODAL OVERRIDES ==================== */
+
+/* Escalate button: red instead of gold */
+.ut-submit-btn.ut-submit-escalate {
+  background: rgba(239, 68, 68, 0.85);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+  color: #fff;
+}
+.ut-submit-btn.ut-submit-escalate:hover:not(:disabled) {
+  background: #ef4444;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.45);
+}
+
+/* Admin Note row: subtle warning highlight */
+.ut-admin-note-row {
+  background: rgba(250, 204, 21, 0.04);
+  border: 1px solid rgba(250, 204, 21, 0.1);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-top: 2px;
+}
+.ut-admin-note {
+  color: rgba(250, 204, 21, 0.8) !important;
+  font-style: italic;
 }

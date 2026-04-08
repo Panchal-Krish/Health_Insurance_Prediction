@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../utils/auth";
-import { AlertCircle, User, Users } from "lucide-react";
+import { AlertCircle, User, Users, Calculator } from "lucide-react";
+import "./../styles/SignIn.css";
 import "./../styles/Predict.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
@@ -145,188 +146,214 @@ function Predict() {
     };
 
     return (
-        <div className="pp-page">
-            <div className="pp-card">
+        <div className="auth-page">
+            <div className="auth-card auth-card-wide" style={{ maxWidth: '1000px' }}>
 
-                <h1 className="pp-title">Premium Calculator</h1>
-                <p className="pp-subtitle">
-                    Get an instant estimate of your insurance premium
-                </p>
-
-                {/* HTTP/System errors */}
-                {globalError && (
-                    <div className="pp-global-error">
-                        <AlertCircle size={18} style={{marginRight: '8px', verticalAlign: 'middle'}}/>
-                        {globalError}
-                    </div>
-                )}
-
-                <form className="pp-form" onSubmit={handleSubmit}>
-
-                    {/* Prediction For */}
-                    <div className="pp-group">
-                        <label>This prediction is for <span className="required-star">*</span></label>
-                        <div className="pp-toggle-group">
-                            <button
-                                type="button"
-                                className={`pp-toggle-btn ${form.prediction_for === 'self' ? 'pp-toggle-active' : ''}`}
-                                onClick={() => { setForm({ ...form, prediction_for: 'self', beneficiary_name: '' }); if (errors.beneficiary_name) setErrors({ ...errors, beneficiary_name: null }); }}
-                            >
-                                <User size={16} />
-                                Myself
-                            </button>
-                            <button
-                                type="button"
-                                className={`pp-toggle-btn ${form.prediction_for === 'other' ? 'pp-toggle-active' : ''}`}
-                                onClick={() => setForm({ ...form, prediction_for: 'other' })}
-                            >
-                                <Users size={16} />
-                                Someone Else
-                            </button>
+                {/* Left Branding Panel */}
+                <div className="auth-branding">
+                    <div className="brand-content">
+                        <div className="brand-icon">
+                            <Calculator size={28} />
+                        </div>
+                        <h2>AI Assessment</h2>
+                        <p>
+                            Our state-of-the-art machine learning model analyzes your demographics and lifestyle factors to accurately predict your optimal health insurance premium in real-time.
+                        </p>
+                        
+                        <div className="brand-features">
+                            <div className="brand-feature">
+                                <span className="feature-dot"></span> Personalized Profiling
+                            </div>
+                            <div className="brand-feature">
+                                <span className="feature-dot"></span> 100% Private & Secure
+                            </div>
+                            <div className="brand-feature">
+                                <span className="feature-dot"></span> Instant Results
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    {/* Beneficiary Name (conditional) */}
-                    {form.prediction_for === 'other' && (
-                        <div className="pp-group pp-slide-in">
-                            <label>Beneficiary Name <span className="required-star">*</span></label>
-                            <input
-                                type="text"
-                                name="beneficiary_name"
-                                className={errors.beneficiary_name ? 'input-error' : ''}
-                                placeholder="Enter the person's name"
-                                value={form.beneficiary_name}
-                                onChange={handleChange}
-                                maxLength={100}
-                            />
-                            {errors.beneficiary_name && (
-                                <span className="field-error-msg">
-                                    <AlertCircle size={14} /> {errors.beneficiary_name}
-                                </span>
-                            )}
+                {/* Right Form Panel */}
+                <div className="auth-form-panel" style={{ padding: '40px' }}>
+                    <h2 className="auth-title">Calculate Premium</h2>
+                    <p className="auth-subtitle">Provide your details to get an instant estimate.</p>
+
+                    {/* HTTP/System errors */}
+                    {globalError && (
+                        <div className="pp-global-error">
+                            <AlertCircle size={18} style={{marginRight: '8px', verticalAlign: 'middle'}}/>
+                            {globalError}
                         </div>
                     )}
 
-                    {/* Age */}
-                    <div className="pp-group">
-                        <label>Age <span className="required-star">*</span></label>
-                        <input
-                            type="number"
-                            name="age"
-                            className={errors.age ? "input-error" : ""}
-                            placeholder="Enter your age (18-100)"
-                            value={form.age}
-                            onChange={handleChange}
-                        />
-                        {errors.age && (
-                            <span className="field-error-msg">
-                                <AlertCircle size={14} /> {errors.age}
-                            </span>
-                        )}
-                    </div>
+                    <form className="pp-form" onSubmit={handleSubmit}>
 
-                    {/* Gender */}
-                    <div className="pp-group">
-                        <label>Gender <span className="required-star">*</span></label>
-                        <select
-                            name="gender"
-                            className={errors.gender ? "input-error" : ""}
-                            value={form.gender}
-                            onChange={handleChange}
-                        >
-                            <option value="">Select Gender</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                        </select>
-                        {errors.gender && (
-                            <span className="field-error-msg">
-                                <AlertCircle size={14} /> {errors.gender}
-                            </span>
-                        )}
-                    </div>
-
-                    {/* BMI */}
-                    <div className="pp-group">
-                        <label>BMI (Body Mass Index) <span className="required-star">*</span></label>
-                        <input
-                            type="number"
-                            name="bmi"
-                            step="0.1"
-                            className={errors.bmi ? "input-error" : ""}
-                            placeholder="e.g., 24.5"
-                            value={form.bmi}
-                            onChange={handleChange}
-                        />
-                        {errors.bmi ? (
-                            <span className="field-error-msg">
-                                <AlertCircle size={14} /> {errors.bmi}
-                            </span>
-                        ) : (
-                            <small className="pp-hint">Normal range: 18.5 - 24.9</small>
-                        )}
-                    </div>
-
-                    {/* Children */}
-                    <div className="pp-group">
-                        <label>Number of Dependents <span className="required-star">*</span></label>
-                        <input
-                            type="number"
-                            name="children"
-                            className={errors.children ? "input-error" : ""}
-                            placeholder="0"
-                            value={form.children}
-                            onChange={handleChange}
-                        />
-                        {errors.children && (
-                            <span className="field-error-msg">
-                                <AlertCircle size={14} /> {errors.children}
-                            </span>
-                        )}
-                    </div>
-
-                    {/* Region */}
-                    <div className="pp-group">
-                        <label>Region <span className="required-star">*</span></label>
-                        <select
-                            name="region"
-                            className={errors.region ? "input-error" : ""}
-                            value={form.region}
-                            onChange={handleChange}
-                        >
-                            <option value="">Select Region</option>
-                            <option value="northeast">Northeast</option>
-                            <option value="northwest">Northwest</option>
-                            <option value="southeast">Southeast</option>
-                            <option value="southwest">Southwest</option>
-                        </select>
-                        {errors.region && (
-                            <span className="field-error-msg">
-                                <AlertCircle size={14} /> {errors.region}
-                            </span>
-                        )}
-                    </div>
-
-                    {/* Smoker */}
-                    <div className="pp-group">
-                        <div className="pp-checkbox">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    name="smoker"
-                                    checked={form.smoker}
-                                    onChange={handleChange}
-                                />
-                                I am a smoker
-                            </label>
+                        {/* Prediction For */}
+                        <div className="pp-group" style={{ gridColumn: 'span 2' }}>
+                            <label>This prediction is for <span className="required-star">*</span></label>
+                            <div className="pp-toggle-group">
+                                <button
+                                    type="button"
+                                    className={`pp-toggle-btn ${form.prediction_for === 'self' ? 'pp-toggle-active' : ''}`}
+                                    onClick={() => { setForm({ ...form, prediction_for: 'self', beneficiary_name: '' }); if (errors.beneficiary_name) setErrors({ ...errors, beneficiary_name: null }); }}
+                                >
+                                    <User size={16} />
+                                    Myself
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`pp-toggle-btn ${form.prediction_for === 'other' ? 'pp-toggle-active' : ''}`}
+                                    onClick={() => setForm({ ...form, prediction_for: 'other' })}
+                                >
+                                    <Users size={16} />
+                                    Someone Else
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Button */}
-                    <button type="submit" className="pp-btn" disabled={loading}>
-                        {loading ? "Calculating Premium..." : "Calculate Premium"}
-                    </button>
+                        {/* Beneficiary Name (conditional) */}
+                        {form.prediction_for === 'other' && (
+                            <div className="pp-group pp-slide-in" style={{ gridColumn: 'span 2' }}>
+                                <label>Beneficiary Name <span className="required-star">*</span></label>
+                                <input
+                                    type="text"
+                                    name="beneficiary_name"
+                                    className={errors.beneficiary_name ? 'input-error' : ''}
+                                    placeholder="Enter the person's name"
+                                    value={form.beneficiary_name}
+                                    onChange={handleChange}
+                                    maxLength={100}
+                                />
+                                {errors.beneficiary_name && (
+                                    <span className="field-error-msg">
+                                        <AlertCircle size={14} /> {errors.beneficiary_name}
+                                    </span>
+                                )}
+                            </div>
+                        )}
 
-                </form>
+                        {/* Age */}
+                        <div className="pp-group">
+                            <label>Age <span className="required-star">*</span></label>
+                            <input
+                                type="number"
+                                name="age"
+                                className={errors.age ? "input-error" : ""}
+                                placeholder="e.g., 34"
+                                value={form.age}
+                                onChange={handleChange}
+                            />
+                            {errors.age && (
+                                <span className="field-error-msg">
+                                    <AlertCircle size={14} /> {errors.age}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Gender */}
+                        <div className="pp-group">
+                            <label>Gender <span className="required-star">*</span></label>
+                            <select
+                                name="gender"
+                                className={errors.gender ? "input-error" : ""}
+                                value={form.gender}
+                                onChange={handleChange}
+                            >
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                            {errors.gender && (
+                                <span className="field-error-msg">
+                                    <AlertCircle size={14} /> {errors.gender}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* BMI */}
+                        <div className="pp-group">
+                            <label>BMI (Body Mass Index) <span className="required-star">*</span></label>
+                            <input
+                                type="number"
+                                name="bmi"
+                                step="0.1"
+                                className={errors.bmi ? "input-error" : ""}
+                                placeholder="e.g., 24.5"
+                                value={form.bmi}
+                                onChange={handleChange}
+                            />
+                            {errors.bmi ? (
+                                <span className="field-error-msg">
+                                    <AlertCircle size={14} /> {errors.bmi}
+                                </span>
+                            ) : (
+                                <small className="pp-hint">Normal range: 18.5 - 24.9</small>
+                            )}
+                        </div>
+
+                        {/* Children */}
+                        <div className="pp-group">
+                            <label>Dependents <span className="required-star">*</span></label>
+                            <input
+                                type="number"
+                                name="children"
+                                className={errors.children ? "input-error" : ""}
+                                placeholder="0"
+                                value={form.children}
+                                onChange={handleChange}
+                            />
+                            {errors.children && (
+                                <span className="field-error-msg">
+                                    <AlertCircle size={14} /> {errors.children}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Region */}
+                        <div className="pp-group">
+                            <label>Region <span className="required-star">*</span></label>
+                            <select
+                                name="region"
+                                className={errors.region ? "input-error" : ""}
+                                value={form.region}
+                                onChange={handleChange}
+                            >
+                                <option value="">Select Region</option>
+                                <option value="northeast">Northeast</option>
+                                <option value="northwest">Northwest</option>
+                                <option value="southeast">Southeast</option>
+                                <option value="southwest">Southwest</option>
+                            </select>
+                            {errors.region && (
+                                <span className="field-error-msg">
+                                    <AlertCircle size={14} /> {errors.region}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Smoker */}
+                        <div className="pp-group">
+                            <div className="pp-checkbox">
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        name="smoker"
+                                        checked={form.smoker}
+                                        onChange={handleChange}
+                                    />
+                                    I am a smoker
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Button */}
+                        <button type="submit" className="auth-submit" style={{ gridColumn: 'span 2', marginTop: '10px' }} disabled={loading}>
+                            {loading ? "Calculating Premium..." : "Calculate Premium"}
+                        </button>
+
+                    </form>
+                </div>
             </div>
         </div>
     );

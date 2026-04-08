@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import {
-  Loader, AlertCircle, CheckCircle,
-  Briefcase, Ticket, RefreshCw, X, Clock, Mail, MailOpen, ChevronLeft, ChevronRight
+  Loader, AlertCircle, CheckCircle, Shield,
+  Briefcase, Ticket, RefreshCw, X, Clock, Mail, MailOpen, ChevronLeft, ChevronRight, Users, Tag
 } from 'lucide-react';
 import { fetchWithAuth } from '../utils/auth';
 import { useAuth } from '../context/AuthContext';
@@ -300,6 +300,16 @@ function ManagerDashboard() {
             ) : (
               <div className="table-container">
                 <table className="ticket-table">
+                  <colgroup>
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                    <col />
+                  </colgroup>
                   <thead>
                     <tr>
                       <th>ID</th>
@@ -333,32 +343,34 @@ function ManagerDashboard() {
                         </td>
                         <td className="date-cell">{new Date(ticket.created_at).toLocaleDateString()}</td>
                         <td className="actions-cell">
-                          <button
-                            className="action-btn start"
-                            onClick={() => {
-                              setCurrentTicket(ticket);
-                              setSelectedStatus('In Progress');
-                              setManagerResponse(ticket.manager_response || '');
-                              setShowResponseModal(true);
-                            }}
-                            disabled={ticket.status === 'Resolved' || ticket.status === 'Closed'}
-                            title={ticket.status === 'Resolved' || ticket.status === 'Closed' ? 'Ticket is closed' : ''}
-                          >
-                            {ticket.status === 'Open' ? 'Start Work' : 'Update'}
-                          </button>
-                          <button
-                            className="action-btn resolve"
-                            onClick={() => {
-                              setCurrentTicket(ticket);
-                              setSelectedStatus('Resolved');
-                              setManagerResponse(ticket.manager_response || '');
-                              setShowResponseModal(true);
-                            }}
-                            disabled={ticket.status === 'Resolved' || ticket.status === 'Closed'}
-                            title={ticket.status === 'Resolved' || ticket.status === 'Closed' ? 'Ticket is already closed' : ''}
-                          >
-                            Resolve
-                          </button>
+                          <div className="actions-inner">
+                            <button
+                              className="action-btn start"
+                              onClick={() => {
+                                setCurrentTicket(ticket);
+                                setSelectedStatus('In Progress');
+                                setManagerResponse(ticket.manager_response || '');
+                                setShowResponseModal(true);
+                              }}
+                              disabled={ticket.status === 'Resolved' || ticket.status === 'Closed'}
+                              title={ticket.status === 'Resolved' || ticket.status === 'Closed' ? 'Ticket is closed' : ''}
+                            >
+                              {ticket.status === 'Open' ? 'Start Work' : 'Update'}
+                            </button>
+                            <button
+                              className="action-btn resolve"
+                              onClick={() => {
+                                setCurrentTicket(ticket);
+                                setSelectedStatus('Waiting Admin');
+                                setManagerResponse(ticket.manager_response || '');
+                                setShowResponseModal(true);
+                              }}
+                              disabled={ticket.status === 'Resolved' || ticket.status === 'Closed'}
+                              title={ticket.status === 'Resolved' || ticket.status === 'Closed' ? 'Ticket is already closed' : ''}
+                            >
+                              Escalate
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -464,57 +476,152 @@ function ManagerDashboard() {
           </>
         )}
 
-        {/* Update Ticket Modal */}
+        {/* ===================== UPDATE TICKET MODAL ===================== */}
         {showResponseModal && currentTicket && (
           <div className="modal-overlay" onClick={closeResponseModal}>
-            <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h3>Update Ticket: {currentTicket.ticket_id}</h3>
-                <button onClick={closeResponseModal} className="close-btn"><X size={20} /></button>
+            <div className="ut-modal" onClick={(e) => e.stopPropagation()}>
+
+              {/* ── Header ── */}
+              <div className="ut-header">
+                <div className="ut-header-top">
+                  <div className="ut-title-group">
+                    <div className="ut-icon-ring">
+                      <Briefcase size={20} />
+                    </div>
+                    <div>
+                      <p className="ut-label">
+                        {selectedStatus === 'Waiting Admin' ? 'Escalate Ticket' : 'Update Ticket'}
+                      </p>
+                      <h3 className="ut-title">{currentTicket.ticket_id}</h3>
+                    </div>
+                  </div>
+                  <button onClick={closeResponseModal} className="ut-close-btn" aria-label="Close">
+                    <X size={18} />
+                  </button>
+                </div>
+                <div className="ut-chips">
+                  <span className={`ut-chip priority-chip-${currentTicket.priority?.toLowerCase()}`}>
+                    {currentTicket.priority}
+                  </span>
+                  <span className={`ut-chip status-chip-${currentTicket.status?.toLowerCase().replace(/\s+/g, '-')}`}>
+                    {currentTicket.status}
+                  </span>
+                  {currentTicket.category && (
+                    <span className="ut-chip assigned-chip">
+                      <Tag size={11} />
+                      {currentTicket.category}
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="ticket-info-box">
-                <p><strong>User:</strong>        {currentTicket.email}</p>
-                <p><strong>Subject:</strong>     {currentTicket.subject}</p>
-                <p><strong>Category:</strong>    {currentTicket.category}</p>
-                <p><strong>Priority:</strong>    {currentTicket.priority}</p>
-                <p><strong>Description:</strong></p>
-                <p className="ticket-description">{currentTicket.description}</p>
+
+              {/* ── Ticket Info ── */}
+              <div className="ut-info-section">
+                <div className="ut-info-row">
+                  <Mail size={14} className="ut-info-icon" />
+                  <span className="ut-info-key">User</span>
+                  <span className="ut-info-val">{currentTicket.email}</span>
+                </div>
+                <div className="ut-info-row">
+                  <Ticket size={14} className="ut-info-icon" />
+                  <span className="ut-info-key">Subject</span>
+                  <span className="ut-info-val">{currentTicket.subject}</span>
+                </div>
+                {currentTicket.description && (
+                  <div className="ut-info-row ut-info-desc">
+                    <AlertCircle size={14} className="ut-info-icon" />
+                    <span className="ut-info-key">Description</span>
+                    <span className="ut-info-val ut-desc-text">{currentTicket.description}</span>
+                  </div>
+                )}
                 {currentTicket.admin_response && (
-                  <>
-                    <p><strong>Admin Note:</strong></p>
-                    <p className="admin-note">{currentTicket.admin_response}</p>
-                  </>
+                  <div className="ut-info-row ut-info-desc ut-admin-note-row">
+                    <Shield size={14} className="ut-info-icon" />
+                    <span className="ut-info-key">Admin Note</span>
+                    <span className="ut-info-val ut-desc-text ut-admin-note">{currentTicket.admin_response}</span>
+                  </div>
                 )}
               </div>
-              <form onSubmit={updateTicket}>
-                <div className="form-group">
-                  <label>Status *</label>
-                  <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} disabled={updatingTicket}>
-                    <option value="Open">Open</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Waiting Admin">Escalate to Admin</option>
-                    <option value="Resolved">Resolved</option>
-                  </select>
+
+              {/* ── Form ── */}
+              <form onSubmit={updateTicket} className="ut-form">
+
+                {/* Status Picker */}
+                <div className="ut-field-group">
+                  <label className="ut-field-label">
+                    <Shield size={13} />
+                    Set Status
+                  </label>
+                  <div className="ut-status-pills">
+                    {[
+                      { value: 'In Progress',   color: 'purple', label: 'In Progress'   },
+                      { value: 'Waiting Admin', color: 'red',    label: 'Escalate to Admin' },
+                    ].map(({ value, color, label }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        disabled={updatingTicket}
+                        className={`ut-status-pill ut-pill-${color} ${selectedStatus === value ? 'ut-pill-active' : ''}`}
+                        onClick={() => setSelectedStatus(value)}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label>Your Response *</label>
-                  <textarea
-                    placeholder="Enter your response or notes for the user..."
-                    value={managerResponse}
-                    onChange={(e) => setManagerResponse(e.target.value)}
+
+                {/* Response Textarea */}
+                <div className="ut-field-group">
+                  <label className="ut-field-label">
+                    <Mail size={13} />
+                    Your Response <span className="ut-required">*</span>
+                  </label>
+                  <div className="ut-textarea-wrap">
+                    <textarea
+                      className="ut-textarea"
+                      placeholder={
+                        selectedStatus === 'Waiting Admin'
+                          ? 'Describe the issue and what you need from the admin…'
+                          : 'Write your investigation notes or response to the user…'
+                      }
+                      value={managerResponse}
+                      onChange={(e) => setManagerResponse(e.target.value)}
+                      disabled={updatingTicket}
+                      rows={4}
+                      required
+                      minLength={10}
+                    />
+                    <div className="ut-char-counter">
+                      <span className={managerResponse.length < 10 ? 'ut-counter-warn' : 'ut-counter-ok'}>
+                        {managerResponse.length} chars
+                      </span>
+                      {managerResponse.length < 10 && (
+                        <span className="ut-counter-hint">{' '}· min 10</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="ut-actions">
+                  <button
+                    type="button"
+                    className="ut-cancel-btn"
+                    onClick={closeResponseModal}
                     disabled={updatingTicket}
-                    rows={6}
-                    required
-                    minLength={10}
-                  />
-                  <small className="char-count">{managerResponse.length} characters</small>
-                </div>
-                <div className="modal-actions">
-                  <button type="button" className="secondary-btn" onClick={closeResponseModal} disabled={updatingTicket}>
+                  >
                     Cancel
                   </button>
-                  <button type="submit" className="primary-btn" disabled={updatingTicket}>
-                    {updatingTicket ? <><Loader className="spinner" />Updating...</> : 'Update Ticket'}
+                  <button
+                    type="submit"
+                    className={`ut-submit-btn ${selectedStatus === 'Waiting Admin' ? 'ut-submit-escalate' : ''}`}
+                    disabled={updatingTicket || managerResponse.trim().length < 10}
+                  >
+                    {updatingTicket
+                      ? <><Loader className="spinner" size={16} /> Updating…</>
+                      : selectedStatus === 'Waiting Admin'
+                        ? <><Users size={16} /> Escalate to Admin</>
+                        : <><CheckCircle size={16} /> Submit Update</>}
                   </button>
                 </div>
               </form>

@@ -425,6 +425,16 @@ function AdminPanel() {
 
           <div className="table-container">
             <table className="ticket-table">
+              <colgroup>
+                <col />
+                <col />
+                <col />
+                <col />
+                <col />
+                <col />
+                <col />
+                <col />
+              </colgroup>
               <thead>
                 <tr>
                   <th>ID</th>
@@ -459,32 +469,34 @@ function AdminPanel() {
                       <td>{ticket.assigned_to || "Unassigned"}</td>
                       <td className="notes-cell">{ticket.manager_response || "—"}</td>
                       <td className="actions-cell">
-                        {/* Assign manager dropdown */}
-                        <select
-                          value={assignSelections[ticket.ticket_id] || ""}
-                          onChange={(e) => handleAssignChange(ticket.ticket_id, e.target.value)}
-                          className="assign-select"
-                        >
-                          <option value="">Assign...</option>
-                          {managers.map((m) => (
-                            <option key={m.email} value={m.email}>{m.fullName}</option>
-                          ))}
-                        </select>
-                        <div className="actions-row">
-                          <button
-                            className="action-btn assign"
-                            onClick={() => assignTicket(ticket.ticket_id)}
-                            disabled={!assignSelections[ticket.ticket_id]}
-                            title="Confirm assignment"
+                        <div className="actions-inner">
+                          {/* Assign manager dropdown */}
+                          <select
+                            value={assignSelections[ticket.ticket_id] || ""}
+                            onChange={(e) => handleAssignChange(ticket.ticket_id, e.target.value)}
+                            className="assign-select"
                           >
-                            Assign
-                          </button>
-                          <button
-                            className="action-btn"
-                            onClick={() => openResponseModal(ticket)}
-                          >
-                            Update
-                          </button>
+                            <option value="">Assign...</option>
+                            {managers.map((m) => (
+                              <option key={m.email} value={m.email}>{m.fullName}</option>
+                            ))}
+                          </select>
+                          <div className="actions-row">
+                            <button
+                              className="action-btn assign"
+                              onClick={() => assignTicket(ticket.ticket_id)}
+                              disabled={!assignSelections[ticket.ticket_id]}
+                              title="Confirm assignment"
+                            >
+                              Assign
+                            </button>
+                            <button
+                              className="action-btn update"
+                              onClick={() => openResponseModal(ticket)}
+                            >
+                              Update
+                            </button>
+                          </div>
                         </div>
                       </td>
                     </tr>
@@ -650,45 +662,136 @@ function AdminPanel() {
       {/* ===================== UPDATE TICKET MODAL ===================== */}
       {showResponseModal && currentTicket && (
         <div className="modal-overlay" onClick={closeResponseModal}>
-          <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Update Ticket: {currentTicket.ticket_id}</h3>
-              <button onClick={closeResponseModal} className="close-btn"><X size={20} /></button>
-            </div>
-            <div className="ticket-info-box">
-              <p><strong>User:</strong> {currentTicket.email}</p>
-              <p><strong>Subject:</strong> {currentTicket.subject}</p>
-              <p><strong>Description:</strong> {currentTicket.description}</p>
-            </div>
-            <form onSubmit={updateTicket}>
-              <div className="form-group">
-                <label>Status *</label>
-                <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} disabled={updatingTicket}>
-                  <option value="Open">Open</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Waiting Admin">Waiting Admin</option>
-                  <option value="Resolved">Resolved</option>
-                  <option value="Closed">Closed</option>
-                </select>
+          <div className="ut-modal" onClick={(e) => e.stopPropagation()}>
+
+            {/* ── Header ── */}
+            <div className="ut-header">
+              <div className="ut-header-top">
+                <div className="ut-title-group">
+                  <div className="ut-icon-ring">
+                    <Ticket size={20} />
+                  </div>
+                  <div>
+                    <p className="ut-label">Update Ticket</p>
+                    <h3 className="ut-title">{currentTicket.ticket_id}</h3>
+                  </div>
+                </div>
+                <button onClick={closeResponseModal} className="ut-close-btn" aria-label="Close">
+                  <X size={18} />
+                </button>
               </div>
-              <div className="form-group">
-                <label>Admin Response *</label>
-                <textarea
-                  placeholder="Enter your response to the user..."
-                  value={adminResponse}
-                  onChange={(e) => setAdminResponse(e.target.value)}
+              <div className="ut-chips">
+                <span className={`ut-chip priority-chip-${currentTicket.priority?.toLowerCase()}`}>
+                  {currentTicket.priority}
+                </span>
+                <span className={`ut-chip status-chip-${currentTicket.status?.toLowerCase().replace(/\s+/g, '-')}`}>
+                  {currentTicket.status}
+                </span>
+                {currentTicket.assigned_to && (
+                  <span className="ut-chip assigned-chip">
+                    <Users size={11} />
+                    {currentTicket.assigned_to}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* ── Ticket Info ── */}
+            <div className="ut-info-section">
+              <div className="ut-info-row">
+                <Mail size={14} className="ut-info-icon" />
+                <span className="ut-info-key">User</span>
+                <span className="ut-info-val">{currentTicket.email}</span>
+              </div>
+              <div className="ut-info-row">
+                <Ticket size={14} className="ut-info-icon" />
+                <span className="ut-info-key">Subject</span>
+                <span className="ut-info-val">{currentTicket.subject}</span>
+              </div>
+              {currentTicket.description && (
+                <div className="ut-info-row ut-info-desc">
+                  <AlertCircle size={14} className="ut-info-icon" />
+                  <span className="ut-info-key">Description</span>
+                  <span className="ut-info-val ut-desc-text">{currentTicket.description}</span>
+                </div>
+              )}
+            </div>
+
+            {/* ── Form ── */}
+            <form onSubmit={updateTicket} className="ut-form">
+
+              {/* Status Picker */}
+              <div className="ut-field-group">
+                <label className="ut-field-label">
+                  <Shield size={13} />
+                  New Status
+                </label>
+                <div className="ut-status-pills">
+                  {[
+                    { value: "Open",        color: "yellow" },
+                    { value: "In Progress", color: "purple" },
+                    { value: "Resolved",    color: "green"  },
+                    { value: "Closed",      color: "gray"   },
+                  ].map(({ value, color }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      disabled={updatingTicket}
+                      className={`ut-status-pill ut-pill-${color} ${selectedStatus === value ? "ut-pill-active" : ""}`}
+                      onClick={() => setSelectedStatus(value)}
+                    >
+                      {value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Response Textarea */}
+              <div className="ut-field-group">
+                <label className="ut-field-label">
+                  <Mail size={13} />
+                  Admin Response <span className="ut-required">*</span>
+                </label>
+                <div className="ut-textarea-wrap">
+                  <textarea
+                    className="ut-textarea"
+                    placeholder="Write a detailed response to the user…"
+                    value={adminResponse}
+                    onChange={(e) => setAdminResponse(e.target.value)}
+                    disabled={updatingTicket}
+                    rows={4}
+                    required
+                    minLength={10}
+                  />
+                  <div className="ut-char-counter">
+                    <span className={adminResponse.length < 10 ? "ut-counter-warn" : "ut-counter-ok"}>
+                      {adminResponse.length} chars
+                    </span>
+                    {adminResponse.length < 10 && (
+                      <span className="ut-counter-hint">{' '}· min 10</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="ut-actions">
+                <button
+                  type="button"
+                  className="ut-cancel-btn"
+                  onClick={closeResponseModal}
                   disabled={updatingTicket}
-                  rows={6}
-                  required
-                  minLength={10}
-                />
-              </div>
-              <div className="modal-actions">
-                <button type="button" className="secondary-btn" onClick={closeResponseModal} disabled={updatingTicket}>
+                >
                   Cancel
                 </button>
-                <button type="submit" className="primary-btn" disabled={updatingTicket}>
-                  {updatingTicket ? <><Loader className="spinner" /> Updating...</> : "Update Ticket"}
+                <button
+                  type="submit"
+                  className="ut-submit-btn"
+                  disabled={updatingTicket || adminResponse.trim().length < 10}
+                >
+                  {updatingTicket
+                    ? <><Loader className="spinner" size={16} /> Updating…</>
+                    : <><CheckCircle size={16} /> Update Ticket</>}
                 </button>
               </div>
             </form>
@@ -701,3 +804,4 @@ function AdminPanel() {
 }
 
 export default AdminPanel;
+

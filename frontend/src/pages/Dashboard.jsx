@@ -87,14 +87,35 @@ function Dashboard() {
                         </div>
                     </div>
 
-                    <div className="empty-state">
-                        <div style={{ background: 'rgba(56, 189, 248, 0.1)', padding: '30px', borderRadius: '50%', marginBottom: '20px' }}>
-                            <Calculator size={64} color="#38bdf8" />
+                    <div className="empty-state-glass">
+                        <div className="empty-state-icon-wrapper">
+                            <div className="glow-ring"></div>
+                            <Calculator size={40} className="empty-state-icon" />
                         </div>
-                        <h2>No Predictions Yet</h2>
-                        <p>You haven't calculated any premiums yet. Run our state-of-the-art machine learning model to get your personalized health insurance estimate instantly.</p>
+                        <h2 className="empty-state-title">Ready to calculate your first premium?</h2>
+                        <p className="empty-state-desc">
+                            Leverage our AI-powered model to get an accurate, personalized health insurance estimate in seconds.
+                        </p>
+                        
+                        <div className="empty-state-steps">
+                            <div className="step-item">
+                                <div className="step-num">1</div>
+                                <span>Enter details</span>
+                            </div>
+                            <div className="step-line" />
+                            <div className="step-item">
+                                <div className="step-num">2</div>
+                                <span>AI assesses risk</span>
+                            </div>
+                            <div className="step-line" />
+                            <div className="step-item">
+                                <div className="step-num">3</div>
+                                <span>Get premium</span>
+                            </div>
+                        </div>
+
                         <button className="predict-large-btn" onClick={() => navigate('/predict')}>
-                            Calculate First Premium
+                            Calculate First Premium <ChevronRight size={20} />
                         </button>
                     </div>
                 </div>
@@ -175,8 +196,7 @@ function Dashboard() {
                         <div className="stat-details">
                             <span className="stat-label">Smoker Status</span>
                             <span className="stat-value" style={{
-                                color: latest.smoker ? '#ef4444' : '#10b981',
-                                fontSize: latest.smoker ? '27px' : '27px'
+                                color: latest.smoker ? '#ef4444' : '#10b981'
                             }}>
                                 {latest.smoker ? 'Smoker' : 'Non-Smoker'}
                             </span>

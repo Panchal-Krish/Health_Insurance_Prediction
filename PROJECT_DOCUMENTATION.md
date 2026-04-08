@@ -1117,7 +1117,7 @@ Step-by-step explanation of how the prediction system works.
 **URL:** `/admin`  
 **Auth:** Admin only
 
-A comprehensive admin dashboard with:
+A comprehensive admin dashboard with a premium dark-mode design:
 
 **Stats Cards (4):** Total Tickets, Managers Count, Resolved Count, Unread Messages
 
@@ -1126,9 +1126,10 @@ A comprehensive admin dashboard with:
 1. **Tickets Tab**:
    - **Team Management**: Lists all managers with a "Create Manager" button
    - **Manager Creation Modal**: Full Name, Email, Password form
-   - **Tickets Table**: Filterable by status and priority with columns: ID, User, Subject, Priority badge, Status badge, Assigned To, Manager Notes, Actions
-   - **Actions per ticket**: Assign dropdown (select manager → click Assign), Update button (opens modal)
-   - **Ticket Update Modal**: View ticket details, change status (Open → In Progress → Waiting Admin → Resolved → Closed), write admin response (min 10 chars)
+   - **Tickets Table**: Redesigned with `overflow-x: auto`, fixed column widths via `<colgroup>`, `table-layout: fixed` — no more content clipping. Filterable by status and priority. Columns: ID, User, Subject, Priority badge, Status badge, Assigned To, Actions
+   - **Actions per ticket**: Assign dropdown (select manager → click Assign button); Update button (opens the Update Ticket modal)
+   - **Update Ticket Modal (redesigned)**: Premium `ut-modal` layout with gradient header, ticket ID badge, priority/status chips. Info section shows User, Subject, Description. Status is changed via **interactive color-coded pill buttons** — admin can set: **Open** (yellow), **In Progress** (purple), **Resolved** (green), **Closed** (grey). Admin writes a response (min 10 chars, live character counter). Submit button shows loading spinner.
+   > ⚠️ **Note:** Admin **cannot** set `Waiting Admin` status — that status is exclusively set by managers when escalating.
 
 2. **Messages Tab**:
    - Inbox of contact form submissions
@@ -1152,13 +1153,18 @@ Similar to AdminPanel but scoped to the manager's assigned tickets:
 **Two Tabs:**
 
 1. **Tickets Tab**:
-   - Table of assigned tickets with filters
-   - Actions: "Start Work" (changes status to In Progress) or "Update" and "Resolve"
-   - Update modal with status dropdown and response textarea
-   - Tickets marked Resolved/Closed have disabled action buttons
+   - **Tickets Table**: Same redesigned layout as AdminPanel — scrollable, fixed column widths, compact cells. Filterable by status and priority.
+   - **Two action buttons per ticket** (inside an `actions-inner` flex wrapper):
+     - **"Start Work" / "Update"** (purple) — sets status to `In Progress`, opens the Update modal
+     - **"Escalate"** (green) — sets status to `Waiting Admin`, opens the Update modal for the manager to submit their verdict/notes for admin review
+   - Both buttons are disabled when ticket is Resolved or Closed
+   - **Update Ticket Modal (redesigned)**: Premium `ut-modal` layout matching the admin panel. Header shows Briefcase icon, ticket ID, priority/status/category chips. Info section shows User, Subject, Description, and **Admin Note** (if admin has already responded — shown with a gold-tinted highlight). Status is changed via **2 pill buttons only**:
+     - **In Progress** (purple) — manager is actively working
+     - **Escalate to Admin** (red) — manager has a verdict/needs admin approval; sets status to `Waiting Admin`
+   - Textarea placeholder adapts to selected status. Submit button label and color also adapt (gold for updates, red for escalation).
 
 2. **Messages Tab**:
-   - Same inbox as admin (managers also have `admin` OR `manager` access to contacts)
+   - Same inbox as admin (managers also have access to contacts)
    - Mark as read functionality
    - Pagination
 
@@ -1305,41 +1311,75 @@ Similar to AdminPanel but scoped to the manager's assigned tickets:
 
 ## 12. Support Ticket Lifecycle
 
+The ticket lifecycle is a **5-state state machine** enforced by both the backend and the UI. Each status can only be set by specific roles — this is enforced through separate admin and manager modals with different status options.
+
 ```
-                    ┌────────────┐
-                    │    OPEN    │ ◄── User creates ticket
-                    └─────┬──────┘
-                          │
-               Admin assigns to Manager
-                          │
-                    ┌─────▼──────┐
-                    │IN PROGRESS │ ◄── Manager starts work
-                    └─────┬──────┘
-                          │
-              ┌───────────┴───────────┐
-              │                       │
-        ┌─────▼──────┐         ┌─────▼──────┐
-        │  WAITING   │         │  RESOLVED  │ ◄── Manager resolves
-        │   ADMIN    │         └─────┬──────┘
-        └─────┬──────┘               │
-              │                      │
-      Admin reviews &          ┌─────▼──────┐
-        responds               │   CLOSED   │ ◄── Admin closes
-              │                └────────────┘
-              ▼
-        Back to RESOLVED
-        or CLOSED
+ ┌──────────────────────────────────────────────────────────────────┐
+ │                   TICKET STATUS STATE MACHINE                    │
+ ├──────────────────────────────────────────────────────────────────┤
+ │                                                                  │
+ │  [User creates ticket]                                           │
+ │          │                                                       │
+ │          ▼                                                       │
+ │  ┌───────────────┐                                               │
+ │  │     OPEN      │  ◄── Set by: System (on creation)            │
+ │  └───────┬───────┘                                               │
+ │          │                                                       │
+ │  [Admin reviews & assigns to manager]                            │
+ │          │                                                       │
+ │          ▼                                                       │
+ │  ┌───────────────┐                                               │
+ │  │  IN PROGRESS  │  ◄── Set by: Admin (on assign) or Manager    │
+ │  └───────┬───────┘                                               │
+ │          │                                                       │
+ │  [Manager investigates & submits verdict]                        │
+ │          │                                                       │
+ │          ▼                                                       │
+ │  ┌───────────────┐                                               │
+ │  │ WAITING ADMIN │  ◄── Set by: Manager ONLY (Escalate button)  │
+ │  └───────┬───────┘                                               │
+ │          │                                                       │
+ │  [Admin reviews manager's verdict]                               │
+ │          │                                                       │
+ │    Approve? ── No ──► back to IN PROGRESS (manager re-works)    │
+ │          │ Yes                                                   │
+ │          ▼                                                       │
+ │  ┌───────────────┐                                               │
+ │  │   RESOLVED    │  ◄── Set by: Admin ONLY                      │
+ │  └───────┬───────┘                                               │
+ │          │                                                       │
+ │  [Admin confirms closure]                                        │
+ │          │                                                       │
+ │          ▼                                                       │
+ │  ┌───────────────┐                                               │
+ │  │    CLOSED     │  ◄── Set by: Admin ONLY                      │
+ │  └───────────────┘                                               │
+ │                                                                  │
+ └──────────────────────────────────────────────────────────────────┘
 ```
+
+### Who Sets Each Status
+
+| Status | Set By | When |
+|---|---|---|
+| `Open` | System (auto) | User submits a new ticket |
+| `In Progress` | **Admin** or **Manager** | Admin assigns to manager; or manager clicks "Start Work" |
+| `Waiting Admin` | **Manager ONLY** | Manager clicks "Escalate" — signals admin review needed |
+| `Resolved` | **Admin ONLY** | Admin approves the manager's verdict, sends closing response |
+| `Closed` | **Admin ONLY** | Admin fully wraps up the ticket |
+
+> ⚠️ The Admin UI **does not show a "Waiting Admin" pill** — admins cannot set this status themselves. The Manager UI **does not show Resolved or Closed** — managers cannot close tickets.
 
 ### Ticket Fields & Who Can Modify Them
 
 | Field | Created By | Modified By |
 |---|---|---|
 | `subject`, `description`, `category`, `priority` | User | — (immutable after creation) |
-| `status` | System (`"Open"`) | Admin, Manager |
+| `status` | System (`"Open"`) | Admin (Open/In Progress/Resolved/Closed), Manager (In Progress/Waiting Admin) |
 | `assigned_to`, `assigned_role` | — | Admin only |
 | `admin_response` | — | Admin only |
 | `manager_response` | — | Manager only |
+
 
 ---
 
@@ -1586,4 +1626,4 @@ A development utility to wipe specific MongoDB collections:
 ---
 
 *Documentation generated on April 7, 2026.*  
-*Last updated: v1.1 — Added Email Verification, Password Reset, User Profile, Brevo Integration*
+*Last updated: v1.2 (April 9, 2026) — Admin/Manager UI redesign (premium modals, color-coded pill status selectors), ticket lifecycle state machine diagram, role-based status enforcement (Admin: Open/In Progress/Resolved/Closed; Manager: In Progress/Waiting Admin), Manager Dashboard escalation flow documentation*

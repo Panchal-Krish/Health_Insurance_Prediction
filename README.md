@@ -88,9 +88,10 @@ The application features a complete **role-based system** with user dashboards, 
 
 ### 🎫 Support System
 - Users create categorized, prioritized tickets
-- Admins assign tickets to managers
-- Managers respond and resolve
-- Full ticket lifecycle tracking
+- Admins review, then assign tickets to managers
+- Managers investigate and escalate verdict back to admin
+- Admin reviews, resolves, and closes the ticket
+- Full 5-state lifecycle: Open → In Progress → Waiting Admin → Resolved → Closed
 
 </td>
 </tr>
@@ -98,10 +99,11 @@ The application features a complete **role-based system** with user dashboards, 
 <td width="50%">
 
 ### 🛡️ Admin Panel
-- View & manage all support tickets
-- Create manager accounts
-- Assign tickets to team members
-- Review contact form submissions
+- Redesigned premium dark-mode UI with fixed-width scrollable tables
+- View & manage all support tickets with status/priority filters
+- Create manager accounts and assign tickets to team members
+- Update tickets via interactive status pill picker (Open / In Progress / Resolved / Closed)
+- Review contact form submissions (inbox with pagination)
 
 </td>
 <td width="50%">

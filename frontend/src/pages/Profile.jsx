@@ -11,67 +11,70 @@ function Profile() {
     if (!user) return null;
 
     return (
-        <div className="auth-page auth-page-top">
-            <div className="auth-card auth-card-profile">
+        <div className="auth-page">
+            <div className="auth-card auth-card-wide">
 
-                {/* Profile Header */}
-                <div className="profile-header">
-                    <div className="profile-avatar">
-                        {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
-                    </div>
-                    <div className="profile-header-info">
-                        <h1 className="auth-title">{user.fullName || 'User'}</h1>
-                        <p className="auth-subtitle">{user.email}</p>
+                {/* Left Side: Profile Side Panel */}
+                <div className="auth-branding profile-sidebar">
+                    <div className="brand-content profile-sidebar-content">
+                        <div className="profile-avatar-large">
+                            {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <h2 className="auth-title profile-sidebar-name">{user.fullName || 'User'}</h2>
+                        <p className="auth-subtitle profile-sidebar-email">{user.email}</p>
+                        
+                        <div className="profile-role-badge">
+                            <Shield size={14} />
+                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                        </div>
                     </div>
                 </div>
                 
-                <div className="auth-form-panel auth-full-panel">
+                {/* Right Side: Account Settings */}
+                <div className="auth-form-panel">
+                    <h2 className="auth-title">Account Settings</h2>
+                    <p className="auth-subtitle">View your details and manage security preferences.</p>
                     
-                    {/* Account Info Section */}
-                    <div className="profile-section">
-                        <h3 className="profile-section-title">Account Information</h3>
-                        <div className="profile-fields">
-                            <div className="field">
-                                <label>Full Name</label>
-                                <div className="field-input field-input-disabled">
-                                    <User size={16} className="field-icon" />
-                                    <input type="text" value={user.fullName || 'User'} disabled />
+                    <div className="profile-grid">
+                        {/* Account Info Section */}
+                        <div className="profile-section">
+                            <h3 className="profile-section-title">Personal Details</h3>
+                            <div className="profile-fields">
+                                <div className="field">
+                                    <label>Full Name</label>
+                                    <div className="field-input field-input-disabled">
+                                        <User size={16} className="field-icon" />
+                                        <input type="text" value={user.fullName || 'User'} disabled />
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="field">
-                                <label>Email Address</label>
-                                <div className="field-input field-input-disabled">
-                                    <Mail size={16} className="field-icon" />
-                                    <input type="text" value={user.email} disabled />
-                                </div>
-                            </div>
-
-                            <div className="field">
-                                <label>Account Role</label>
-                                <div className="field-input field-input-disabled">
-                                    <Shield size={16} className="field-icon" />
-                                    <input type="text" value={user.role.charAt(0).toUpperCase() + user.role.slice(1)} disabled />
+                                <div className="field">
+                                    <label>Email Address</label>
+                                    <div className="field-input field-input-disabled">
+                                        <Mail size={16} className="field-icon" />
+                                        <input type="text" value={user.email} disabled />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Security Section */}
-                    <div className="profile-section profile-section-bordered">
-                        <div className="profile-security-header">
-                            <KeyRound size={20} className="profile-security-icon" />
-                            <h3 className="profile-section-title">Security</h3>
+                        {/* Security Section */}
+                        <div className="profile-section">
+                            <div className="profile-security-header">
+                                <KeyRound size={20} className="profile-security-icon" />
+                                <h3 className="profile-section-title">Security</h3>
+                            </div>
+                            <p className="profile-security-desc">
+                                Need to update your password? We will send a secure reset link to your email.
+                            </p>
+                            <button 
+                                className="auth-submit auth-btn-outline"
+                                onClick={() => navigate('/forgot-password')}
+                                style={{ marginTop: 'auto' }}
+                            >
+                                Change Password <ArrowRight size={16} />
+                            </button>
                         </div>
-                        <p className="profile-security-desc">
-                            Need to update your password? We'll send a password reset link to your email address.
-                        </p>
-                        <button 
-                            className="auth-submit auth-btn-outline auth-btn-auto"
-                            onClick={() => navigate('/forgot-password')}
-                        >
-                            Change Password <ArrowRight size={16} />
-                        </button>
                     </div>
 
                 </div>
