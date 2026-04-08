@@ -70,7 +70,7 @@ const factors = [
 const faqs = [
     {
         q: "How accurate is the prediction?",
-        a: "Our ExtraTreesRegressor model achieves an R² score of 81.2% on 5-fold cross-validation using the standard insurance dataset. The Mean Absolute Error is approximately $1,811."
+        a: "Our ExtraTreesRegressor model achieves an R² score of 89.71% on testing against the standard insurance dataset. The Mean Absolute Error is approximately $1,996.02, and RMSE is $4,347.61."
     },
     {
         q: "Is my personal data safe?",

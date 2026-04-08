@@ -19,6 +19,12 @@ try:
     tickets_collection.create_index("user_id")
     contacts_collection.create_index("created_at")
     email_tokens_collection.create_index("expires_at", expireAfterSeconds=0)
+    
+    # Performance optimization indexes
+    tickets_collection.create_index("status")
+    tickets_collection.create_index("assigned_to")
+    email_tokens_collection.create_index("email")
+    contacts_collection.create_index("status")
 
     print("Database connected successfully")
 except Exception as e:

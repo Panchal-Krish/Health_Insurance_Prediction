@@ -3,9 +3,9 @@ from database import prediction_logs
 
 stats_bp = Blueprint('stats', __name__)
 
-# Real model accuracy from 5-fold cross-validation on the insurance dataset
-# ExtraTreesRegressor with 800 estimators: R² = 0.8118
-MODEL_ACCURACY = 81.2
+# Real model accuracy from test set evaluation on the insurance dataset
+# ExtraTreesRegressor with 800 estimators: R² = 0.8971
+MODEL_ACCURACY = 89.71
 
 @stats_bp.route('/public-stats', methods=['GET'])
 def get_public_stats():

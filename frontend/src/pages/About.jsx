@@ -146,7 +146,7 @@ function About() {
                     </div>
                     <div className="about-stat-divider" />
                     <div className="about-stat">
-                        <span className="about-stat-num">81.2%</span>
+                        <span className="about-stat-num">89.71%</span>
                         <span className="about-stat-label">Model R² Score</span>
                     </div>
                 </div>

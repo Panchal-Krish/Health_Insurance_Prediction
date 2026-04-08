@@ -741,6 +741,10 @@ Stores email verification and password reset tokens. Has a **TTL index** on `exp
 | `support_tickets` | `user_id` | Standard | Fast per-user queries |
 | `contacts` | `created_at` | Standard | Chronological sorting |
 | `email_tokens` | `expires_at` | **TTL** | Auto-delete expired tokens |
+| `support_tickets` | `status` | Standard | Optimizes admin dashboard filtering by status |
+| `support_tickets` | `assigned_to` | Standard | Prevents full collection scans during manager ticket lookups |
+| `email_tokens` | `email` | Standard | Accelerates token lookups during the password reset flow |
+| `contacts` | `status` | Standard | Speeds up admin inbox filtering for read/unread messages |
 
 ---
 
