@@ -93,13 +93,13 @@ function App() {
             <Route
               path="/about"
               element={
-                  <About />
+                <About />
               }
             />
             <Route
               path="/howitworks"
               element={
-                  <HowitWorks />
+                <HowitWorks />
               }
             />
 

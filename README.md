@@ -55,7 +55,7 @@ The application features a complete **role-based system** with user dashboards, 
 <td width="50%">
 
 ### 🧮 Smart Predictions
-- ML-powered premium estimates (81.2% R²)
+- ML-powered premium estimates (89.71% R²)
 - Predict for yourself or a named beneficiary
 - 6 health factors analyzed with 14 engineered features
 - Fallback formula if model unavailable
@@ -147,6 +147,7 @@ The application features a complete **role-based system** with user dashboards, 
 |---|---|
 | **MongoDB** | NoSQL document database |
 | **5 Collections** | `customers`, `prediction_logs`, `support_tickets`, `contacts`, `email_tokens` |
+| **Indexes** | Optimized with 9 query performance indexes (including TTL & Unique constraints) |
 
 ---
 
@@ -201,7 +202,7 @@ The application features a complete **role-based system** with user dashboards, 
 | **Algorithm** | ExtraTreesRegressor (scikit-learn) |
 | **Estimators** | 800 |
 | **Evaluation** | 5-fold Cross-Validation |
-| **R² Score** | **81.2%** |
+| **R² Score** | **89.71%** |
 | **Target Transform** | `log1p(charges)` → `expm1(prediction)` |
 | **Model Size** | ~49 MB (serialized with joblib) |
 

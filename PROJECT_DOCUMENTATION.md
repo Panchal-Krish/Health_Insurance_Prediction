@@ -51,7 +51,7 @@ This project is a **full-stack web application** that predicts health insurance 
 
 | Feature | Description |
 |---|---|
-| **ML-Powered Predictions** | Uses an ExtraTreesRegressor model (800 estimators) trained on real insurance data with an R² of 81.2% |
+| **ML-Powered Predictions** | Uses an ExtraTreesRegressor model (800 estimators) trained on real insurance data with an R² of 89.71% |
 | **User Accounts** | Full signup/login system with JWT-based authentication and "Remember Me" persistence |
 | **Email Verification** | Signup triggers a Brevo transactional email with a 24h verification link; unverified users cannot log in |
 | **Password Reset** | Forgot Password flow sends a 1h reset link via Brevo; users set a new password securely |
@@ -627,11 +627,11 @@ Returns:
 {
     "prediction_count": 147,
     "prediction_count_display": "140+",
-    "model_accuracy": 81.2
+    "model_accuracy": 89.71
 }
 ```
 
-The model accuracy (`81.2%`) is a hardcoded constant based on 5-fold cross-validation of the ExtraTreesRegressor.
+The model accuracy (`89.71%`) is a hardcoded constant based on test set evaluation of the ExtraTreesRegressor.
 
 ---
 
@@ -788,8 +788,8 @@ Model Serialization
 |---|---|
 | Algorithm | ExtraTreesRegressor |
 | Estimators | 800 |
-| Evaluation | 5-fold Cross-Validation |
-| R² Score | **0.8118 (81.2%)** |
+| Evaluation | Test Set Evaluation |
+| R² Score | **0.8971 (89.71%)** |
 | Target Transform | `log1p(charges)` / `expm1(prediction)` |
 
 ### Input Features (14 total)
@@ -946,7 +946,7 @@ Sections:
 1. **Hero**: "Know Your Premium Before You Commit" with CTA buttons
    - Logged in: "Calculate Premium" → `/predict`
    - Not logged in: "Get Started Free" → `/signup`
-2. **Stats Bar**: Fetches `/public-stats` — shows prediction count, model accuracy (81.2%), average response time (<2s), and 100% data privacy
+2. **Stats Bar**: Fetches `/public-stats` — shows prediction count, model accuracy (89.71%), average response time (<2s), and 100% data privacy
 3. **Features Grid**: 4 cards — Data-Driven Predictions, Instant Results, Secure & Private, Track Your History
 4. **CTA Section**: Glassmorphism card with call-to-action
 
@@ -1168,7 +1168,7 @@ Similar to AdminPanel but scoped to the manager's assigned tickets:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        ROLE HIERARCHY                                │
+│                        ROLE HIERARCHY                               │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │   ADMIN ──── Full system access                                     │
@@ -1185,14 +1185,14 @@ Similar to AdminPanel but scoped to the manager's assigned tickets:
 │     │        • CANNOT assign tickets                                │
 │     │        • CANNOT create users                                  │
 │     │                                                               │
-│   USER ──── Standard access                                        │
+│   USER ──── Standard access                                         │
 │              • Make predictions (self and others)                   │
 │              • View own prediction history                          │
 │              • Create support tickets                               │
 │              • View own tickets + responses                         │
 │              • CANNOT access admin/manager panels                   │
 │                                                                     │
-│   GUEST ─── No account required                                    │
+│   GUEST ─── No account required                                     │
 │              • View Home, About, How it Works                       │
 │              • Submit contact form                                  │
 │              • CANNOT make predictions                              │
@@ -1307,10 +1307,10 @@ Similar to AdminPanel but scoped to the manager's assigned tickets:
 
 ```
                     ┌────────────┐
-                    │   OPEN     │ ◄── User creates ticket
+                    │    OPEN    │ ◄── User creates ticket
                     └─────┬──────┘
                           │
-                 Admin assigns to Manager
+               Admin assigns to Manager
                           │
                     ┌─────▼──────┐
                     │IN PROGRESS │ ◄── Manager starts work
@@ -1323,8 +1323,8 @@ Similar to AdminPanel but scoped to the manager's assigned tickets:
         │   ADMIN    │         └─────┬──────┘
         └─────┬──────┘               │
               │                      │
-     Admin reviews &           ┌─────▼──────┐
-     responds                  │   CLOSED   │ ◄── Admin closes
+      Admin reviews &          ┌─────▼──────┐
+        responds               │   CLOSED   │ ◄── Admin closes
               │                └────────────┘
               ▼
         Back to RESOLVED
@@ -1547,7 +1547,7 @@ The React dev server starts on `http://localhost:3000` and proxies API calls to 
 | Limitation | Details |
 |---|---|
 | **No admin creation UI** | Admin accounts must be created directly in MongoDB |
-| **Static model accuracy** | The 81.2% value is hardcoded, not dynamically computed |
+| **Static model accuracy** | The 89.71% value is hardcoded, not dynamically computed |
 | **No model retraining** | The ML model is a static `.pkl` file with no retraining pipeline |
 | **Limited prediction inputs** | Only 6 health factors; real insurance uses many more |
 | **USD only** | Premiums are displayed in US dollars only |
