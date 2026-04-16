@@ -7,7 +7,7 @@ import { fetchWithAuth } from '../utils/auth';
 import { useAuth } from '../context/AuthContext';
 import '../styles/ManagerDashboard.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_URL = process.env.REACT_APP_API_URL || '';
 
 const TABS = { TICKETS: "tickets", MESSAGES: "messages" };
 

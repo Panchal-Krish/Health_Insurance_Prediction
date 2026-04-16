@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Lock, Eye, EyeOff, AlertCircle, CheckCircle, ArrowRight, ShieldCheck } from 'lucide-react';
 import './../styles/AuthPages.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_URL = process.env.REACT_APP_API_URL || '';
 
 function ResetPassword() {
     const { token } = useParams();

@@ -6,7 +6,7 @@ import {
 import { fetchWithAuth } from "../utils/auth";
 import "../styles/AdminPanel.css";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API_URL = process.env.REACT_APP_API_URL || "";
 
 // Tabs available in the admin panel
 const TABS = { TICKETS: "tickets", MESSAGES: "messages" };
@@ -804,4 +804,4 @@ function AdminPanel() {
 }
 
 export default AdminPanel;
-
+

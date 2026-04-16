@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import "./../styles/Contact.css";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API_URL = process.env.REACT_APP_API_URL || "";
 
 function Contact() {
     const navigate = useNavigate();

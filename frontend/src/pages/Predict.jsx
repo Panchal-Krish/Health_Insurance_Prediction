@@ -5,7 +5,7 @@ import { AlertCircle, User, Users, Calculator } from "lucide-react";
 import "./../styles/SignIn.css";
 import "./../styles/Predict.css";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API_URL = process.env.REACT_APP_API_URL || "";
 
 function Predict() {
     const navigate = useNavigate();
