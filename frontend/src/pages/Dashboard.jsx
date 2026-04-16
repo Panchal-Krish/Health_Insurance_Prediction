@@ -9,7 +9,7 @@ import { fetchWithAuth } from '../utils/auth';
 import { useAuth } from '../context/AuthContext';
 import './../styles/Dashboard.css';
 
-const API_URL = process.env.REACT_APP_API_URL || '';
+const API_URL = process.env.REACT_APP_API_URL || '/api';
 
 function Dashboard() {
     const navigate = useNavigate();

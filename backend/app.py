@@ -32,15 +32,15 @@ def create_app():
     from routes.manager_routes import manager_bp
     from routes.stats_routes import stats_bp
 
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(predict_bp)
-    app.register_blueprint(contact_bp)
-    app.register_blueprint(ticket_bp)
-    app.register_blueprint(admin_bp)
-    app.register_blueprint(manager_bp)
-    app.register_blueprint(stats_bp)
+    app.register_blueprint(auth_bp, url_prefix='/api')
+    app.register_blueprint(predict_bp, url_prefix='/api')
+    app.register_blueprint(contact_bp, url_prefix='/api')
+    app.register_blueprint(ticket_bp, url_prefix='/api')
+    app.register_blueprint(admin_bp, url_prefix='/api')
+    app.register_blueprint(manager_bp, url_prefix='/api')
+    app.register_blueprint(stats_bp, url_prefix='/api')
 
-    @app.route("/health", methods=["GET"])
+    @app.route("/api/health", methods=["GET"])
     def health_check():
         from ml_service import ml_model
         return jsonify({

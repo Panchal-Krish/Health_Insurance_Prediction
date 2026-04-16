@@ -15,7 +15,7 @@ function Home() {
         navigate(isLoggedIn ? '/predict' : '/signup');
     };
 
-    const API_URL = process.env.REACT_APP_API_URL || '';
+    const API_URL = process.env.REACT_APP_API_URL || '/api';
     const [stats, setStats] = useState({
         prediction_count_display: '0',
         model_accuracy: 0

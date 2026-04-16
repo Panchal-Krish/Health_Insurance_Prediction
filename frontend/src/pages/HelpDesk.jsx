@@ -3,7 +3,7 @@ import { Loader, AlertCircle, CheckCircle, Ticket as TicketIcon, User, Clock } f
 import { fetchWithAuth } from '../utils/auth';
 import './../styles/HelpDesk.css';
 
-const API_URL = process.env.REACT_APP_API_URL || '';
+const API_URL = process.env.REACT_APP_API_URL || '/api';
 
 function HelpDesk() {
   const successTimerRef = useRef(null);   // FIX #8: cleanup on unmount
