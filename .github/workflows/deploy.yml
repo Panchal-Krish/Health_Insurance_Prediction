@@ -32,7 +32,7 @@ jobs:
         with:
           api-key: ${{ secrets.IBM_IAM_API_KEY }}
           region: 'eu-gb' # London region
-          resource-group: 'Default' # explicitly specify resource group
+          resource-group: '275edcd99e4b4252a8d2a7805534352a' # explicitly specify resource group
           project: 'dhananjay_project'
           name: 'health-insurance-prediction'
           image: 'docker.io/dhananjay0901/health-insurance-prediction:latest'
