@@ -13,4 +13,4 @@ class Config:
     MODEL_PATH = os.getenv('MODEL_PATH', 'insurance_extra_trees_model.pkl')
     BREVO_API_KEY = os.getenv('BREVO_API_KEY')
     FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
-    SENDER_EMAIL = os.getenv('SENDER_EMAIL', 'g16@ibmproject@gmail.com')
+    SENDER_EMAIL = os.getenv('SENDER_EMAIL', 'g16ibmproject@gmail.com')

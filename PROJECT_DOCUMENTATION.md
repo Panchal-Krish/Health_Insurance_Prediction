@@ -74,12 +74,12 @@ This project is a **full-stack web application** that predicts health insurance 
 ┌───────────────────────────────────────────────────────────────────┐
 │                         CLIENT (Browser)                          │
 │                                                                   │
-│   React 19  ·  React Router 7  ·  Lucide Icons  ·  Vanilla CSS   │
+│   React 19  ·  React Router 7  ·  Lucide Icons  ·  Vanilla CSS    │
 │                                                                   │
-│   ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────────┐│
-│   │  Home    │ │ SignIn/  │ │Dashboard │ │ Admin / Manager      ││
-│   │  About   │ │ SignUp   │ │ Predict  │ │ HelpDesk / Contact   ││
-│   └──────────┘ └──────────┘ └──────────┘ └──────────────────────┘│
+│   ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────────┐ │
+│   │  Home    │ │ SignIn/  │ │Dashboard │ │ Admin / Manager      │ │
+│   │  About   │ │ SignUp   │ │ Predict  │ │ HelpDesk / Contact   │ │
+│   └──────────┘ └──────────┘ └──────────┘ └──────────────────────┘ │
 │        │              │             │               │             │
 │        └──────────────┴─────────────┴───────────────┘             │
 │                          │  HTTP + JWT                            │
@@ -89,26 +89,26 @@ This project is a **full-stack web application** that predicts health insurance 
 ┌───────────────────────────────────────────────────────────────────┐
 │                       BACKEND (Flask API)                         │
 │                                                                   │
-│   Flask 3.1  ·  Flask-CORS  ·  PyJWT  ·  Werkzeug  ·  Joblib    │
+│   Flask 3.1  ·  Flask-CORS  ·  PyJWT  ·  Werkzeug  ·  Joblib      │
 │                                                                   │
-│   ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌──────────────┐  │
-│   │ Auth       │ │ Predict    │ │ Tickets    │ │ Admin /      │  │
-│   │ Routes     │ │ Routes     │ │ Routes     │ │ Manager /    │  │
-│   │ (signup/   │ │ (predict,  │ │ (create,   │ │ Stats /      │  │
-│   │  login)    │ │  history)  │ │  my-tickets│ │ Contact      │  │
-│   └────────────┘ └────────────┘ └────────────┘ └──────────────┘  │
+│   ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌──────────────┐   │
+│   │ Auth       │ │ Predict    │ │ Tickets    │ │ Admin /      │   │
+│   │ Routes     │ │ Routes     │ │ Routes     │ │ Manager /    │   │
+│   │ (signup/   │ │ (predict,  │ │ (create,   │ │ Stats /      │   │
+│   │  login)    │ │  history)  │ │  my-tickets│ │ Contact      │   │
+│   └────────────┘ └────────────┘ └────────────┘ └──────────────┘   │
 │        │              │               │               │           │
 │        └──────────────┴───────────────┴───────────────┘           │
 │                          │                                        │
-│                    ┌─────┴──────┐                                  │
+│                    ┌─────┴──────┐                                 │
 │                    │ ML Service │  ← ExtraTrees model (.pkl)      │
-│                    └────────────┘                                  │
+│                    └────────────┘                                 │
 │                          │                                        │
 └──────────────────────────┼────────────────────────────────────────┘
                            │
                            ▼
 ┌───────────────────────────────────────────────────────────────────┐
-│                     DATABASE (MongoDB)                             │
+│                     DATABASE (MongoDB)                            │
 │                                                                   │
 │   Database: insurance_data                                        │
 │                                                                   │
@@ -204,6 +204,7 @@ Health_Insurance_Prediction/
     │   ├── index.html                  # HTML shell
     │   ├── Logo.svg                    # SVG logo variant
     │   ├── PRO.svg                     # SVG pro badge
+    │   ├── logo.png                    # PNG logo used in manifest
     │   ├── manifest.json               # PWA manifest
     │   └── robots.txt                  # SEO robots config
     │
@@ -213,13 +214,7 @@ Health_Insurance_Prediction/
         ├── App.js                      # Root component; defines all <Routes>
         │
         ├── assets/
-        │   ├── logo.png                # Primary logo (used in Header & Footer)
-        │   ├── logo2.png               # Alternative logo
-        │   ├── logo-testing.png        # Hi-res testing logo
-        │   ├── footer.png              # Footer background image
-        │   ├── footer1.png             # Footer variant 1
-        │   ├── footer2.png             # Footer variant 2
-        │   └── footerr.png             # Footer variant 3
+        │   └── logo.png               # Primary logo (used in Header & Footer)
         │
         ├── components/
         │   ├── Header.jsx              # Navigation bar (role-aware, responsive)
@@ -277,12 +272,12 @@ The application uses the **Flask application factory pattern**:
 
 ```python
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder=None)  # Disables default /static/ to avoid SPA conflicts
     app.config.from_object(Config)
 
     CORS(app, resources={
         r"/*": {
-            "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+            "origins": "*",                      # All origins — same-origin in production
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"]
         }
@@ -291,18 +286,19 @@ def create_app():
     import database       # Initializes MongoDB connection
     import ml_service     # Loads the ML model into memory
 
-    # Register all Blueprints
+    # Register all Blueprints (all at /api prefix)
     from routes.auth_routes import auth_bp
     from routes.predict_routes import predict_bp
     # ... (all 7 blueprints)
 
-    app.register_blueprint(auth_bp)
+    app.register_blueprint(auth_bp, url_prefix='/api')
     # ...
 
-    @app.route("/health", methods=["GET"])
+    @app.route("/api/health", methods=["GET"])
     def health_check():
         return jsonify({
             "status": "healthy",
+            "message": "API is running",
             "model_loaded": ml_model is not None
         }), 200
 
@@ -310,10 +306,11 @@ def create_app():
 ```
 
 **Key points:**
-- CORS is configured to allow the React dev server at `localhost:3000`.
+- CORS is configured to allow all origins (`"*"`) — in production, the frontend and backend share the same origin so this is safe.
+- `static_folder=None` disables Flask's default `/static/` handler, preventing it from intercepting React's bundled assets before the SPA catch-all.
 - Both `database.py` and `ml_service.py` run their initialization code at import time (module-level execution).
-- There are **7 Blueprints**: `auth`, `predict`, `contact`, `ticket`, `admin`, `manager`, `stats`.
-- A `/health` endpoint provides a liveness check and confirms whether the ML model is loaded.
+- There are **7 Blueprints**: `auth`, `predict`, `contact`, `ticket`, `admin`, `manager`, `stats` — all registered at `/api` prefix.
+- A `/api/health` endpoint provides a liveness check and confirms whether the ML model is loaded.
 - The server runs on `0.0.0.0:5000` in debug mode during development.
 
 ---
@@ -600,8 +597,8 @@ All admin routes require `@token_required` and `@role_required(['admin'])`.
 | `PUT` | `/admin/update-ticket/<ticket_id>` | Update ticket status & admin response |
 | `POST` | `/admin/create-manager` | Create a new manager account |
 | `GET` | `/admin/managers` | List all manager accounts |
-| `GET` | `/api/contacts` | Fetch all contact messages (admin + manager) |
-| `PUT` | `/api/contacts/<contact_id>/read` | Mark a contact message as read |
+| `GET` | `/contacts` | Fetch all contact messages (admin + manager) |
+| `PUT` | `/contacts/<contact_id>/read` | Mark a contact message as read |
 
 ---
 
@@ -1220,9 +1217,9 @@ Similar to AdminPanel but scoped to the manager's assigned tickets:
 ## 10. Authentication Flow — End to End
 
 ```
- ┌────────────┐         ┌────────────┐         ┌──────────┐
- │   Browser  │         │   Flask    │         │  MongoDB │
- └─────┬──────┘         └─────┬──────┘         └────┬─────┘
+ ┌────────────┐         ┌────────────┐          ┌──────────┐
+ │   Browser  │         │   Flask    │          │  MongoDB │
+ └─────┬──────┘         └─────┬──────┘          └────┬─────┘
        │                      │                      │
   1. User fills SignIn form   │                      │
        │                      │                      │
@@ -1230,32 +1227,32 @@ Similar to AdminPanel but scoped to the manager's assigned tickets:
   ──────────────────────────► │                      │
        │                      │  3. Query customers  │
        │                      │ ────────────────────►│
-       │                      │      ◄──────────────│
+       │                      │     ◄────────────────│
        │                      │  4. check_password_hash()
        │                      │  5. generate_token() │
-       │  ◄──────────────────  │                      │
-       │  { token, role, ... } │                      │
+       │ ◄──────────────────  │                      │
+       │ { token, role, ... } │                      │
        │                      │                      │
   6. saveAuthData()           │                      │
-     (localStorage or        │                      │
-      sessionStorage)        │                      │
+     (localStorage or         │                      │
+      sessionStorage)         │                      │
        │                      │                      │
   7. AuthContext.login()      │                      │
-     → setUser() updates UI  │                      │
+     → setUser() updates UI   │                      │
        │                      │                      │
-  8. Navigate to dashboard   │                      │
-     based on role           │                      │
+  8. Navigate to dashboard    │                      │
+     based on role            │                      │
        │                      │                      │
   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
        │                      │                      │
-  9. Future API call with    │                      │
+  9. Future API call with     │                      │
      fetchWithAuth()          │                      │
   ──────────────────────────► │                      │
-  Authorization: Bearer xxx  │                      │
+  Authorization: Bearer xxx   │                      │
        │                      │  @token_required     │
        │                      │  decode & validate   │
        │                      │  attach to request   │
-       │  ◄──────────────────  │                      │
+       │  ◄────────────────── │                      │
        │  200 OK + data       │                      │
 ```
 
@@ -1264,18 +1261,18 @@ Similar to AdminPanel but scoped to the manager's assigned tickets:
 ## 11. Prediction Flow — End to End
 
 ```
- ┌────────────┐       ┌────────────┐       ┌──────────┐        ┌───────────┐
- │  Predict   │       │   Flask    │       │ ML Model │        │  MongoDB  │
- │   Page     │       │  Backend   │       │  (.pkl)  │        │           │
- └─────┬──────┘       └─────┬──────┘       └────┬─────┘        └─────┬─────┘
+ ┌────────────┐        ┌────────────┐        ┌──────────┐         ┌───────────┐
+ │  Predict   │        │   Flask    │        │ ML Model │         │  MongoDB  │
+ │   Page     │        │  Backend   │        │  (.pkl)  │         │           │
+ └─────┬──────┘        └─────┬──────┘        └────┬─────┘         └─────┬─────┘
        │                     │                    │                     │
   1. User fills form         │                    │                     │
-     (age, bmi, etc.)       │                    │                     │
+     (age, bmi, etc.)        │                    │                     │
        │                     │                    │                     │
-  2. Client-side validate   │                    │                     │
+  2. Client-side validate    │                    │                     │
        │                     │                    │                     │
-  3. POST /predict-premium  │                    │                     │
-  ─────────────────────────►│                    │                     │
+  3. POST /predict-premium   │                    │                     │
+  ─────────────────────────► │                    │                     │
        │                     │                    │                     │
        │                     │ 4. Server-side     │                     │
        │                     │    validate        │                     │
@@ -1294,17 +1291,17 @@ Similar to AdminPanel but scoped to the manager's assigned tickets:
        │ ◄───────────────────│                    │                     │
        │ { predicted_premium }                    │                     │
        │                     │                    │                     │
-  9. navigate("/dashboard") │                    │                     │
+  9. navigate("/dashboard")  │                    │                     │
        │                     │                    │                     │
-  10. Dashboard fetches     │                    │                     │
-      /my-predictions       │                    │                     │
-  ─────────────────────────►│ ────────────────────────────────────────►│
-       │                     │ ◄──────────────────────────────────────│
+  10. Dashboard fetches      │                    │                     │
+      /my-predictions        │                    │                     │
+  ─────────────────────────► │ ────────────────────────────────────────►│
+       │                     │   ◄──────────────────────────────────────│
        │ ◄───────────────────│                    │                     │
        │ [list of predictions]                    │                     │
        │                     │                    │                     │
-  11. Render dashboard with │                    │                     │
-      latest + timeline     │                    │                     │
+  11. Render dashboard with  │                    │                     │
+      latest + timeline      │                    │                     │
 ```
 
 ---
@@ -1322,37 +1319,37 @@ The ticket lifecycle is a **5-state state machine** enforced by both the backend
  │          │                                                       │
  │          ▼                                                       │
  │  ┌───────────────┐                                               │
- │  │     OPEN      │  ◄── Set by: System (on creation)            │
+ │  │     OPEN      │  ◄── Set by: System (on creation)             │
  │  └───────┬───────┘                                               │
  │          │                                                       │
  │  [Admin reviews & assigns to manager]                            │
  │          │                                                       │
  │          ▼                                                       │
  │  ┌───────────────┐                                               │
- │  │  IN PROGRESS  │  ◄── Set by: Admin (on assign) or Manager    │
+ │  │  IN PROGRESS  │  ◄── Set by: Admin (on assign) or Manager     │
  │  └───────┬───────┘                                               │
  │          │                                                       │
  │  [Manager investigates & submits verdict]                        │
  │          │                                                       │
  │          ▼                                                       │
  │  ┌───────────────┐                                               │
- │  │ WAITING ADMIN │  ◄── Set by: Manager ONLY (Escalate button)  │
+ │  │ WAITING ADMIN │  ◄── Set by: Manager ONLY (Escalate button)   │
  │  └───────┬───────┘                                               │
  │          │                                                       │
  │  [Admin reviews manager's verdict]                               │
  │          │                                                       │
- │    Approve? ── No ──► back to IN PROGRESS (manager re-works)    │
+ │    Approve? ── No ──► back to IN PROGRESS (manager re-works)     │
  │          │ Yes                                                   │
  │          ▼                                                       │
  │  ┌───────────────┐                                               │
- │  │   RESOLVED    │  ◄── Set by: Admin ONLY                      │
+ │  │   RESOLVED    │  ◄── Set by: Admin ONLY                       │
  │  └───────┬───────┘                                               │
  │          │                                                       │
  │  [Admin confirms closure]                                        │
  │          │                                                       │
  │          ▼                                                       │
  │  ┌───────────────┐                                               │
- │  │    CLOSED     │  ◄── Set by: Admin ONLY                      │
+ │  │    CLOSED     │  ◄── Set by: Admin ONLY                       │
  │  └───────────────┘                                               │
  │                                                                  │
  └──────────────────────────────────────────────────────────────────┘
@@ -1402,8 +1399,8 @@ FRONTEND_URL=http://localhost:3000
 Create a `.env` file in the `frontend/` directory (optional):
 
 ```env
-# Override the default API URL (default: http://localhost:5000)
-REACT_APP_API_URL=http://localhost:5000
+# Override the default API URL (default: /api — relative path for same-origin production)
+REACT_APP_API_URL=http://localhost:5000/api
 ```
 
 > ⚠️ **Important:** The `.env` files are git-ignored and must be created manually on each development machine.
@@ -1510,7 +1507,7 @@ The React dev server starts on `http://localhost:3000` and proxies API calls to 
 ### Verify
 
 1. Open `http://localhost:3000` in your browser.
-2. Check `http://localhost:5000/health` for API status:
+2. Check `http://localhost:5000/api/health` for API status:
    ```json
    {
        "status": "healthy",
@@ -1525,7 +1522,7 @@ The React dev server starts on `http://localhost:3000` and proxies API calls to 
 
 | Method | Endpoint | Auth | Role | Description |
 |---|---|---|---|---|
-| `GET` | `/health` | ❌ | — | Health check |
+| `GET` | `/api/health` | ❌ | — | Health check |
 | `GET` | `/public-stats` | ❌ | — | Home page stats |
 | `POST` | `/signup` | ❌ | — | Register user (sends verification email) |
 | `POST` | `/login` | ❌ | — | Login (requires verified email, returns JWT) |
@@ -1561,7 +1558,7 @@ The React dev server starts on `http://localhost:3000` and proxies API calls to 
 | **Soft Delete** | `is_deleted` flag on user accounts prevents hard data loss |
 | **Token Storage** | localStorage (persistent) or sessionStorage (session-only) based on "Remember Me" |
 | **Token Validation** | Both client-side (expiry check before request) and server-side (decode + verify) |
-| **CORS** | Restricted to `localhost:3000` origins only |
+| **CORS** | Open (`"*"`) — frontend & backend share the same origin in production |
 | **Input Validation** | Both client-side (React form validation) and server-side (Flask route validation) |
 | **SQL Injection** | N/A — MongoDB with PyMongo (no raw SQL) |
 | **Role Enforcement** | `@role_required` decorator on every admin/manager route |
@@ -1604,9 +1601,9 @@ The React dev server starts on `http://localhost:3000` and proxies API calls to 
 - **Premium comparison** over time (charts/graphs)
 - **Admin analytics dashboard** with prediction trends
 - **Notification system** (email/push for ticket updates)
-- **Deployment** to cloud (AWS/GCP/Azure) with CI/CD
-- **Docker containerization** for easy deployment
 - **Unit & integration tests** (pytest for backend, Jest for frontend)
+
+> ✅ **Already Implemented:** Docker containerization (multi-stage `Dockerfile`) and CI/CD deployment (GitHub Actions → Docker Hub → IBM Code Engine) are already in place.
 
 ---
 
@@ -1626,4 +1623,4 @@ A development utility to wipe specific MongoDB collections:
 ---
 
 *Documentation generated on April 7, 2026.*  
-*Last updated: v1.2 (April 9, 2026) — Admin/Manager UI redesign (premium modals, color-coded pill status selectors), ticket lifecycle state machine diagram, role-based status enforcement (Admin: Open/In Progress/Resolved/Closed; Manager: In Progress/Waiting Admin), Manager Dashboard escalation flow documentation*
+*Last updated: v1.4 (April 16, 2026) — Refactored redundant contact route prefixes (/api/api/contacts → /api/contacts), synchronized frontend Admin and Manager dashboards, fixed missing imports in manager_routes.py*

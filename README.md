@@ -142,6 +142,7 @@ The application features a complete **role-based system** with user dashboards, 
 | **React Router 7** | Client-side routing & navigation |
 | **Lucide React** | Icon system |
 | **Vanilla CSS** | Custom styling (dark theme, glassmorphism) |
+| **Axios** | Installed but unused (fetch preferred) |
 | **Create React App** | Build tooling |
 
 ### Database
@@ -168,7 +169,7 @@ The application features a complete **role-based system** with user dashboards, 
                            ▼
 ┌─────────────────────────────────────────────────────────┐
 │                     Flask Backend                       │
-│  7 Blueprint Routes · JWT Auth · CORS · Validation      │
+│  7 Blueprint Routes · JWT Auth · CORS (*) · Validation  │
 │                                                         │
 │  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐    │
 │  │ Auth Routes  │  │ Predict      │  │ Admin/Manager│   │
@@ -189,7 +190,8 @@ The application features a complete **role-based system** with user dashboards, 
 │                       MongoDB                           │
 │  Database: insurance_data                               │
 │  Collections: customers · prediction_logs ·             │
-│               support_tickets · contacts                │
+│               support_tickets · contacts ·              │
+│               email_tokens                              │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -366,7 +368,7 @@ npm start
 ### 6. Verify
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.  
-Check API health: [http://localhost:5000/health](http://localhost:5000/health)
+Check API health: [http://localhost:5000/api/health](http://localhost:5000/api/health)
 
 ---
 
@@ -386,7 +388,7 @@ FRONTEND_URL=http://localhost:3000             # used in email links
 ### `frontend/.env` (optional)
 
 ```env
-REACT_APP_API_URL=http://localhost:5000        # optional, this is the default
+REACT_APP_API_URL=http://localhost:5000/api    # optional, defaults to /api (relative)
 ```
 
 ---
@@ -397,7 +399,7 @@ REACT_APP_API_URL=http://localhost:5000        # optional, this is the default
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/health` | API health check |
+| `GET` | `/api/health` | API health check |
 | `GET` | `/public-stats` | Home page stats (prediction count, accuracy) |
 | `POST` | `/signup` | Register new user (sends verification email) |
 | `POST` | `/login` | Authenticate → returns JWT (requires verified email) |
@@ -430,8 +432,8 @@ REACT_APP_API_URL=http://localhost:5000        # optional, this is the default
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/contacts` | All contact messages |
-| `PUT` | `/api/contacts/:id/read` | Mark message as read |
+| `GET` | `/contacts` | All contact messages |
+| `PUT` | `/contacts/:id/read` | Mark message as read |
 | `GET` | `/manager/my-tickets` | Manager's assigned tickets |
 | `PUT` | `/manager/update-ticket/:id` | Update ticket & respond |
 
@@ -477,7 +479,7 @@ User ─── self-service
 | Email Verification | Token-based via Brevo API, 24h expiry with TTL index |
 | Password Reset | Secure token-based reset via email, 1h expiry |
 | Authorization | `@role_required` decorator per route |
-| CORS | Restricted to `localhost:3000` |
+| CORS | Open (`"*"`) — frontend & backend share the same origin in production |
 | Input Validation | Client-side (React) + Server-side (Flask) |
 | Token Handling | Auto-expiry check, 401 interception, cross-tab sync |
 | Soft Delete | `is_deleted` flag on user accounts (no hard deletes) |

@@ -70,7 +70,7 @@ function ManagerDashboard() {
 
   const fetchMessages = async () => {
     try {
-      const response = await fetchWithAuth(`${API_URL}/api/contacts`);
+      const response = await fetchWithAuth(`${API_URL}/contacts`);
       if (!response) return;
       if (!response.ok) throw new Error("Failed to fetch messages");
       setMessages(await response.json());
@@ -82,7 +82,7 @@ function ManagerDashboard() {
   const markAsRead = async (messageId) => {
     try {
       const response = await fetchWithAuth(
-        `${API_URL}/api/contacts/${messageId}/read`,
+        `${API_URL}/contacts/${messageId}/read`,
         { method: "PUT" }
       );
       if (!response) return;
