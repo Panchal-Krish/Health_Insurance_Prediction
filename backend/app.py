@@ -52,6 +52,10 @@ def create_app():
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")
     def serve(path):
+        # Never intercept /api/* routes - let Flask return 404 naturally
+        if path.startswith('api'):
+            from flask import abort
+            abort(404)
         if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
             return send_from_directory(app.static_folder, path)
         else:

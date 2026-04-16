@@ -6,7 +6,7 @@ import {
 import { fetchWithAuth } from "../utils/auth";
 import "../styles/AdminPanel.css";
 
-const API_URL = process.env.REACT_APP_API_URL || "";
+const API_URL = process.env.REACT_APP_API_URL || "/api";
 
 // Tabs available in the admin panel
 const TABS = { TICKETS: "tickets", MESSAGES: "messages" };

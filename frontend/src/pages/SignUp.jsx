@@ -3,7 +3,7 @@ import { UserPlus, Mail, Lock, Eye, EyeOff, User, AlertCircle, CheckCircle, Arro
 import { useNavigate } from 'react-router-dom';
 import "./../styles/SignUp.css";
 
-const API_URL = process.env.REACT_APP_API_URL || "";
+const API_URL = process.env.REACT_APP_API_URL || "/api";
 
 function SignUp() {
     const navigate = useNavigate();
