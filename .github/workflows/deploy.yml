@@ -39,8 +39,8 @@ jobs:
           # 1. Safely login to IBM Cloud without immediately binding to a resource group
           ibmcloud login --apikey $IBM_IAM_API_KEY -r eu-gb
           
-          # 2. Target the exact Resource Group ID
-          ibmcloud target -g 275edcd99e4b4252a8d2a7805534352a
+          # 2. Target the exact Resource Group ID (Commented out: API Key lacks permission, let's bypass it!)
+          # ibmcloud target -g 275edcd99e4b4252a8d2a7805534352a
           
           # 3. Select the precise Code Engine Project by ID
           ibmcloud ce project select --id a325fdec-3fa4-4e81-babc-c1fd2d2d3032
