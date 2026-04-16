@@ -11,7 +11,9 @@ def create_app():
     FRONTEND_BUILD = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build'))
 
     # Do NOT set static_folder here — we handle static files ourselves
-    app = Flask(__name__)
+    # static_folder=None disables Flask's default /static/ endpoint which would
+    # intercept React's JS/CSS bundles and return 404 before our catch-all runs.
+    app = Flask(__name__, static_folder=None)
     app.config.from_object(Config)
 
     # Allow all origins (frontend & backend share the same domain in production)
