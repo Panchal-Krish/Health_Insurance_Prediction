@@ -7,21 +7,25 @@ load_dotenv()
 from config import Config
 
 def create_app():
-    frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build'))
-    app = Flask(__name__, static_folder=frontend_dir, static_url_path='/')
+    # Path to the React build output
+    FRONTEND_BUILD = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'build'))
+
+    # Do NOT set static_folder here — we handle static files ourselves
+    app = Flask(__name__)
     app.config.from_object(Config)
 
+    # Allow all origins (frontend & backend share the same domain in production)
     CORS(app, resources={
         r"/*": {
-            "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+            "origins": "*",
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"]
         }
     })
 
     # Initialize components
-    import database # Executes connection setup
-    import ml_service # Executes model load
+    import database  # Executes connection setup
+    import ml_service  # Executes model load
 
     # Register Blueprints
     from routes.auth_routes import auth_bp
@@ -49,17 +53,21 @@ def create_app():
             "model_loaded": ml_model is not None
         }), 200
 
-    @app.route("/", defaults={"path": ""})
-    @app.route("/<path:path>")
+    # === Single catch-all: serves static files OR index.html for React SPA routes ===
+    @app.route('/', defaults={'path': ''})
+    @app.route('/<path:path>')
     def serve(path):
-        # Never intercept /api/* routes - let Flask return 404 naturally
+        # API routes are handled by blueprints — if they hit here it's a real 404
         if path.startswith('api'):
-            from flask import abort
-            abort(404)
-        if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-            return send_from_directory(app.static_folder, path)
-        else:
-            return send_from_directory(app.static_folder, 'index.html')
+            return jsonify({"message": "Not found"}), 404
+
+        # Try to serve a real static asset (JS, CSS, images, etc.)
+        full_path = os.path.join(FRONTEND_BUILD, path)
+        if path and os.path.isfile(full_path):
+            return send_from_directory(FRONTEND_BUILD, path)
+
+        # Fall back to index.html — let React Router handle the URL
+        return send_from_directory(FRONTEND_BUILD, 'index.html')
 
     return app
 
