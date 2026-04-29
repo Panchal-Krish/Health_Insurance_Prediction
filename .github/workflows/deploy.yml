@@ -1,4 +1,4 @@
-name: Deploy to IBM Code Engine
+name: Build and Push to Docker Hub
 
 on:
   push:
@@ -26,21 +26,3 @@ jobs:
           context: .
           push: true
           tags: dhananjay0901/health-insurance-prediction:latest
-
-      - name: Install IBM Cloud CLI
-        run: |
-          curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
-          ibmcloud plugin install code-engine
-
-      - name: Deploy to IBM Code Engine
-        env:
-          IBM_IAM_API_KEY: ${{ secrets.IBM_IAM_API_KEY }}
-        run: |
-          # 1. Login and bind to the specific Resource Group ID in one single step
-          ibmcloud login --apikey $IBM_IAM_API_KEY -r eu-gb -g 275edcd99e4b4252a8d2a7805534352a
-          
-          # 2. Select the precise Code Engine Project by ID
-          ibmcloud ce project select --id a325fdec-3fa4-4e81-babc-c1fd2d2d3032
-          
-          # 3. Force update the running application with the latest built Docker image
-          ibmcloud ce application update --name health-insurance-prediction --image docker.io/dhananjay0901/health-insurance-prediction:latest
